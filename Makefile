@@ -7,7 +7,7 @@ test: build/tests
 	./build/tests
 
 build/tests: tests/tests.cpp src/ci.cpp | build
-	g++ -std=c++17 -I include tests/tests.cpp src/ci.cpp -o build/tests
+	g++ -std=c++17 -I include tests/tests.cpp src/ci.cpp -o build/tests -DTESTING
 	
 build:
 	mkdir -p build
