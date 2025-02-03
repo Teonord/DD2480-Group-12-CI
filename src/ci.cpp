@@ -1,1 +1,68 @@
 #include "../include/ci.hpp"
+
+/** incomingWebhook
+ *  Function to handle HTTP messages sent to the webhook from GitHub. When a request (and response object)
+ *  is recieved from the server, parse the body and check the event header. If event is to be processed, 
+ *  extract the required parameters to be used for the CI. If not used, return a successfull response but
+ *  don't use it. If error in packet, return a 400 status.
+ * 
+ *  @param req a httplib request containing information from GitHub
+ *  @param res a response to send back to GitHub for it to know that the
+ *             request is being serviced. 
+ */
+void incomingWebhook(const httplib::Request &req, httplib::Response &res) {
+    try {
+        auto payload = json::parse(req.body);
+
+        std::string githubEvent = req.get_header_value("X-GitHub-Event");
+
+        if (githubEvent == "push") {
+
+            res.set_content("push recv", "text/plain");
+            res.status = 200;
+
+            std::string ref = payload["ref"];
+            std::string cloneUrl = payload["repository"]["clone_url"];
+            std::string commitSHA = payload["head_commit"]["id"];
+            std::string branch = ref.substr(11);
+
+            #ifndef TESTING
+                // do CI on recieved repository
+            #endif
+            
+        } else if (githubEvent == "pull_request") {
+            std::string action = payload["action"];
+
+            if (action == "opened" || action == "synchronize" || action == "reopened") {
+                res.set_content("pr recv", "text/plain");
+                res.status = 201;
+
+                std::string ref = payload["ref"];
+                std::string cloneUrl = payload["repository"]["clone_url"];
+                std::string commitSHA = payload["pull_request"]["head"]["sha"];
+                std::string branch = payload["pull_request"]["head"]["ref"];
+
+                #ifndef TESTING
+                // do CI on recieved repository
+                #endif
+
+            } else {
+                res.set_content("non-used pr recv", "text/plain");
+                res.status = 202;
+            }
+            
+        } else {
+
+            res.set_content("non-used recv", "text/plain");
+            res.status = 203;
+
+            #ifndef TESTING
+                std::cout << "[Warning]: Non-push or pull_request event recieved" << std::endl;
+            #endif
+        }
+
+    } catch (std::exception &e) {
+        res.status = 400;
+        res.set_content("err", "text/plain");
+    }
+} 
