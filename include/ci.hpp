@@ -2,6 +2,7 @@
 #define CI_H
 
 #include <iostream>
+#include <thread>
 #include <array>
 #include "../external/httplib.h"
 #include "../external/json.hpp"

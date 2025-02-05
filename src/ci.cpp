@@ -1,5 +1,23 @@
 #include "../include/ci.hpp"
 
+/** testingSequence
+ *  Use this sequence to compile, test and return 
+ *  aka this is the thing that does the stuff 
+ *  -------- MAKE BETTER COMMENT AS CODE IS DEVELOPED -----------------
+ */
+void testingSequence(std::string ref, std::string cloneUrl, std::string commitSHA, std::string branch) {
+    // git clone the branch at commit sha
+
+    // make the cloned folder
+
+    // make test the cloned folder, return status
+
+    // message git with commit status
+
+    // p+: save to database
+}
+
+
 /** incomingWebhook
  *  Function to handle HTTP messages sent to the webhook from GitHub. When a request (and response object)
  *  is recieved from the server, parse the body and check the event header. If event is to be processed, 
@@ -28,6 +46,8 @@ void incomingWebhook(const httplib::Request &req, httplib::Response &res) {
 
             #ifndef TESTING
                 // do CI on recieved repository
+                std::thread pr(testingSequence, ref, cloneUrl, commitSHA, branch);
+                pr.detach();
             #endif
             
         } else if (githubEvent == "pull_request") {
@@ -43,7 +63,9 @@ void incomingWebhook(const httplib::Request &req, httplib::Response &res) {
                 std::string branch = payload["pull_request"]["head"]["ref"];
 
                 #ifndef TESTING
-                // do CI on recieved repository
+                    // do CI on recieved repository
+                    std::thread pr(testingSequence, ref, cloneUrl, commitSHA, branch);
+                    pr.detach();
                 #endif
 
             } else {
