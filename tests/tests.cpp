@@ -2,6 +2,9 @@
 
 #include "../external/catch.hpp"
 #include "../include/ci.hpp"
+#include "cppgit2/repository.hpp"
+using namespace cppgit2;
+
 
 TEST_CASE("push events handled correctly", "[incomingWebhook]") {
     httplib::Request req;
@@ -97,4 +100,30 @@ TEST_CASE("error handled with 400", "[incomingWebhook]") {
 
     REQUIRE(res.body == "err");
     REQUIRE(res.status == 400);
+}
+
+// Tests cloning
+TEST_CASE("Tests the repo cloning and correct commitSHA", "[testingSequence]") {
+    std::string ref = "test_clone";
+    std::string cloneUrl = "https://github.com/linusPersonalGit/test_repo.git"; 
+    std::string commitSHA = "dcfb4db"; 
+    std::string branch = "test_branch";
+
+    std::filesystem::remove_all(ref);
+
+    // Repository exists and is an actual git repo
+    REQUIRE(std::filesystem::exists(ref));
+    REQUIRE(std::filesystem::exists(ref + "/.git"));
+
+    std::string headCommit;
+    {
+        repository clonedRepo(ref);
+        auto commit = clonedRepo.head_commit();
+        headCommit = commit.id().str();
+    }
+
+    // We are at the correct commit
+    REQUIRE(headCommit == commitSHA);
+
+    std::filesystem::remove_all(ref);
 }

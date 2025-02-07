@@ -12,5 +12,6 @@ using json = nlohmann::json;
 const int port = 8012;
 
 void incomingWebhook(const httplib::Request &req, httplib::Response &res);
+void testingSequence(std::string ref, std::string cloneUrl, std::string commitSHA, std::string branch)
 
 #endif
