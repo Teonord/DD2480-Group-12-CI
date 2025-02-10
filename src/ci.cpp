@@ -58,7 +58,7 @@ int testProject(std::string projPath) {
 }
 
 void notifyCommitStatus(std::string apiUrl) {
-    httplib::Client client("https://api.github.com");
+    httplib::Client client("http://api.github.com");
     std::string apiPath = apiUrl.substr(22);
 
     std::string token = std::getenv("GITHUB_COMMIT_STATUS_TOKEN");
