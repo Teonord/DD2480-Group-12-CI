@@ -55,7 +55,12 @@ int compileProject(std::string projPath) {
 }
 
 int testProject(std::string projPath) {
+    #ifdef DTESTING
+    std::string test_command =  "cd " + projPath + " && make -s test > result.log 2>&1";
+    #else
     std::string test_command =  "cd " + projPath + " && make -s test > result.log";
+    #endif
+
     return std::system(test_command.c_str());
 }
 
