@@ -1,0 +1,4 @@
+make[1]: Entering directory '/home/magicanz/PersonalGit/DD2480-Group-12-CI/tests/testproject'
+mkdir -p build
+g++ -std=c++17 prog.cpp -o build/prog
+make[1]: Leaving directory '/home/magicanz/PersonalGit/DD2480-Group-12-CI/tests/testproject'

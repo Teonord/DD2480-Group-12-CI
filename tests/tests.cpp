@@ -98,3 +98,27 @@ TEST_CASE("error handled with 400", "[incomingWebhook]") {
     REQUIRE(res.body == "err");
     REQUIRE(res.status == 400);
 }
+
+TEST_CASE("compiles program", "[compileProject]") {
+    REQUIRE(compileProject("./tests/testproject") == 0);
+}
+
+TEST_CASE("doesnt compile non-existent program", "[testProject]") {
+    REQUIRE(compileProject("./tests/nomakeproject") != 0);
+}
+
+TEST_CASE("fails compilation", "[compileProject]") {
+    REQUIRE(compileProject("./tests/badtestproject") != 0);
+}
+
+TEST_CASE("tests program", "[testProject]") {
+    REQUIRE(testProject("./tests/testproject") == 0);
+}
+
+TEST_CASE("fails test", "[testProject]") {
+    REQUIRE(testProject("./tests/badtestproject") != 0);
+}
+
+TEST_CASE("doesnt test non-existent program", "[testProject]") {
+    REQUIRE(testProject("./tests/nomakeproject") != 0);
+}

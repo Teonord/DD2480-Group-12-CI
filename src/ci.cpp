@@ -5,7 +5,7 @@
  *  aka this is the thing that does the stuff 
  *  --------MAKE BETTER COMMENT AS CODE IS DEVELOPED -----------------
  */
-void testingSequence(std::string ref, std::string cloneUrl, std::string commitSHA, std::string branch) {
+void testingSequence(std::string ref, std::string cloneUrl, std::string commitSHA, std::string branch, std::string apiUrl) {
     // git clone the branch at commit sha
     cloneFromGit(cloneUrl, commitSHA, branch);
     std::string projPath = "repos " + commitSHA;
@@ -21,13 +21,14 @@ void testingSequence(std::string ref, std::string cloneUrl, std::string commitSH
     std::system(log_command.c_str());
 
     // message git with commit status
+    notifyCommitStatus(apiUrl);
 
     // p+: save to database
 }
 
 int cloneFromGit(std::string cloneUrl, std::string commitSHA, std::string branch) {
     // Clone options
-    std::string clone_command = "git clone --branch " + branch + " " + cloneUrl + " repos/" + commitSHA;
+    std::string clone_command = "git clone --branch " + branch + " " + cloneUrl + " repos/" + commitSHA + " > /dev/null 2>&1";
 
     // Clone repository
     int res = std::system(clone_command.c_str());
@@ -36,7 +37,7 @@ int cloneFromGit(std::string cloneUrl, std::string commitSHA, std::string branch
     }
 
     // Go to the commitSHA
-    std::string sha_command =  "cd repos/" + commitSHA + " && git reset --hard " + commitSHA;
+    std::string sha_command =  "cd repos/" + commitSHA + " && git reset --hard " + commitSHA + " > /dev/null 2>&1";
     res = std::system(sha_command.c_str());
     if (res != 0) {
         return 2;
@@ -47,13 +48,24 @@ int cloneFromGit(std::string cloneUrl, std::string commitSHA, std::string branch
 
 int compileProject(std::string projPath) {
     // Make code 
-    std::string make_command =  "cd " + projPath + " && make";
+    std::string make_command =  "cd " + projPath + " && make -s > /dev/null 2>&1";
     return std::system(make_command.c_str()); 
 }
 
 int testProject(std::string projPath) {
-    std::string test_command =  "cd " + projPath + " && test > result.log";
+    std::string test_command =  "cd " + projPath + " && make -s test > result.log";
     return std::system(test_command.c_str());
+}
+
+int notifyCommitStatus(std::string apiUrl) {
+    httplib::Client client("https://api.github.com");
+    std::string apiPath = apiUrl.substr(22);
+
+    std::string token = std::getenv("GITHUB_COMMIT_STATUS_TOKEN");
+    nlohmann::json payload = {{"state", "success"}, {"context", "ci/testci"}};
+    nlohmann::json headers =  {{"Authorization", "token " + token}, {"User-Agent", "My-CI-Server"}, {"Accept", "application/vnd.github.v3+json"}};
+
+    auto res = client.Post(apiPath.c_str(), headers, payload.dump(), "application/json");
 }
 
 
@@ -82,10 +94,11 @@ void incomingWebhook(const httplib::Request &req, httplib::Response &res) {
             std::string cloneUrl = payload["repository"]["clone_url"];
             std::string commitSHA = payload["head_commit"]["id"];
             std::string branch = ref.substr(11);
+            std::string statusUrl = payload["repository"]["statuses_url"];
 
             #ifndef TESTING
                 // do CI on recieved repository
-                std::thread pr(testingSequence, ref, cloneUrl, commitSHA, branch);
+                std::thread pr(testingSequence, ref, cloneUrl, commitSHA, branch, statusUrl);
                 pr.detach();
             #endif
             
@@ -100,10 +113,11 @@ void incomingWebhook(const httplib::Request &req, httplib::Response &res) {
                 std::string cloneUrl = payload["repository"]["clone_url"];
                 std::string commitSHA = payload["pull_request"]["head"]["sha"];
                 std::string branch = payload["pull_request"]["head"]["ref"];
+                std::string statusUrl = payload["repository"]["statuses_url"];
 
                 #ifndef TESTING
                     // do CI on recieved repository
-                    std::thread pr(testingSequence, ref, cloneUrl, commitSHA, branch);
+                    std::thread pr(testingSequence, ref, cloneUrl, commitSHA, branch, statusUrl);
                     pr.detach();
                 #endif
 

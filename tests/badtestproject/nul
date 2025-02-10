@@ -1,0 +1,11 @@
+make[1]: Entering directory '/home/magicanz/PersonalGit/DD2480-Group-12-CI/tests/badtestproject'
+mkdir -p build
+g++ -std=c++17 prog.cpp -o build/prog
+prog.cpp: In instantiation of ‘struct CompileFail<false>’:
+prog.cpp:6:20:   required from here
+prog.cpp:3:19: error: static assertion failed: This will fail at compile time.
+    3 |     static_assert(B, "This will fail at compile time.");
+      |                   ^
+prog.cpp:3:19: note: ‘false’ evaluates to false
+make[1]: *** [Makefile:4: build/prog] Error 1
+make[1]: Leaving directory '/home/magicanz/PersonalGit/DD2480-Group-12-CI/tests/badtestproject'
