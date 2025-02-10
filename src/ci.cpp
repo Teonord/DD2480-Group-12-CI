@@ -6,6 +6,8 @@
  *  --------MAKE BETTER COMMENT AS CODE IS DEVELOPED -----------------
  */
 void testingSequence(std::string ref, std::string cloneUrl, std::string commitSHA, std::string branch, std::string apiUrl) {
+    notifyCommitStatus(apiUrl, "pending");
+
     // git clone the branch at commit sha
     cloneFromGit(cloneUrl, commitSHA, branch);
     std::string projPath = "repos/" + commitSHA;
@@ -21,7 +23,7 @@ void testingSequence(std::string ref, std::string cloneUrl, std::string commitSH
     std::system(log_command.c_str());
 
     // message git with commit status
-    notifyCommitStatus(apiUrl);
+    notifyCommitStatus(apiUrl, "success");
 
     // p+: save to database
 }
@@ -57,12 +59,12 @@ int testProject(std::string projPath) {
     return std::system(test_command.c_str());
 }
 
-void notifyCommitStatus(std::string apiUrl) {
+void notifyCommitStatus(std::string apiUrl, std::string status) {
     httplib::Client client("http://api.github.com");
     std::string apiPath = apiUrl.substr(22);
 
     std::string token = std::getenv("GITHUB_COMMIT_STATUS_TOKEN");
-    nlohmann::json payload = {{"state", "success"}, {"context", "ci/testci"}};
+    nlohmann::json payload = {{"state", status}, {"context", "ci/testci"}};
     nlohmann::json headers =  {{"Authorization", "token " + token}, {"User-Agent", "My-CI-Server"}, {"Accept", "application/vnd.github.v3+json"}};
 
     auto res = client.Post(apiPath.c_str(), headers, payload.dump(), "application/json");

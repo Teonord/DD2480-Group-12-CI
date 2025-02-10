@@ -19,6 +19,6 @@ int compileProject(std::string projPath);
 
 int testProject(std::string projPath);
 
-void notifyCommitStatus(std::string apiUrl);
+void notifyCommitStatus(std::string apiUrl, std::string status);
 
 #endif
