@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: ci-postgres
+    environment:
+      POSTGRES_PASSWORD: group12
+      POSTGRES_USER: group12
+      POSTGRES_DB: dd2480-ci
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Mount the init script
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
