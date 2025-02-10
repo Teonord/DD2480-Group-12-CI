@@ -68,6 +68,13 @@ void notifyCommitStatus(std::string apiUrl, std::string status) {
     nlohmann::json headers =  {{"Authorization", "token " + token}, {"User-Agent", "My-CI-Server"}, {"Accept", "application/vnd.github.v3+json"}};
 
     auto res = client.Post(apiPath.c_str(), headers, payload.dump(), "application/json");
+
+    if (res && res->status == 201) {
+        std::cout << "GitHub status updated successfully!\n";
+    } else {
+        std::cerr << "Failed with code " << (res ? res->status : 0) << "\n";
+        if (res) std::cerr << "Response: " << res->body << "\n";
+    }
 }
 
 
