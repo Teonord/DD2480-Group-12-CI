@@ -8,7 +8,7 @@
 void testingSequence(std::string ref, std::string cloneUrl, std::string commitSHA, std::string branch, std::string apiUrl) {
     // git clone the branch at commit sha
     cloneFromGit(cloneUrl, commitSHA, branch);
-    std::string projPath = "repos " + commitSHA;
+    std::string projPath = "repos/" + commitSHA;
 
     // make the cloned folder
     compileProject(projPath);
