@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:latest  # Specify a version for stability
+    container_name: ci-postgres
+    environment:
+      POSTGRES_PASSWORD: group12
+      POSTGRES_USER: group12  # Optional: Define a custom user (default is 'postgres')
+      POSTGRES_DB: dd2480-ci  # Optional: Create a default database
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Persist data to a volume
+    restart: unless-stopped
+
+volumes:
+  postgres_data:  # Define the volume
