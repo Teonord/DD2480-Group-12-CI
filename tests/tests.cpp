@@ -2,8 +2,7 @@
 
 #include "../external/catch.hpp"
 #include "../include/ci.hpp"
-#include "cppgit2/repository.hpp"
-using namespace cppgit2;
+
 
 
 TEST_CASE("push events handled correctly", "[incomingWebhook]") {
@@ -103,27 +102,37 @@ TEST_CASE("error handled with 400", "[incomingWebhook]") {
 }
 
 // Tests cloning
-TEST_CASE("Tests the repo cloning and correct commitSHA", "[testingSequence]") {
-    std::string ref = "test_clone";
+TEST_CASE("Tests the repo cloning and correct commitSHA", "[cloneFromGit]") {
     std::string cloneUrl = "https://github.com/linusPersonalGit/test_repo.git"; 
-    std::string commitSHA = "dcfb4db"; 
+    std::string commitSHA = "54917ea"; 
     std::string branch = "test_branch";
+    std::string repoPath = "repos/" + commitSHA;
 
-    std::filesystem::remove_all(ref);
+    int result = cloneFromGit(cloneUrl, commitSHA, branch);
+    REQUIRE(result != 0);
 
-    // Repository exists and is an actual git repo
-    REQUIRE(std::filesystem::exists(ref));
-    REQUIRE(std::filesystem::exists(ref + "/.git"));
+    // Verify repo
+    REQUIRE(std::filesystem::exists(repoPath));
 
-    std::string headCommit;
-    {
-        repository clonedRepo(ref);
-        auto commit = clonedRepo.head_commit();
-        headCommit = commit.id().str();
-    }
+    // Check if the correct branch is checked out
+    std::string branch_check_cmd = "cd " + repoPath + " && git rev-parse --abbrev-ref HEAD > branch.txt";
+    std::system(branch_check_cmd.c_str());
 
-    // We are at the correct commit
-    REQUIRE(headCommit == commitSHA);
+    std::ifstream branchFile(repoPath + "/branch.txt");
+    std::string currentBranch;
+    std::getline(branchFile, currentBranch);
+    branchFile.close();
+    
+    REQUIRE(currentBranch == branch);
 
-    std::filesystem::remove_all(ref);
+    // Check if the HEAD commit matches the expected commit SHA
+    std::string sha_check_cmd = "cd " + repoPath + " && git rev-parse HEAD > sha.txt";
+    std::system(sha_check_cmd.c_str());
+
+    std::ifstream shaFile(repoPath + "/sha.txt");
+    std::string currentSHA;
+    std::getline(shaFile, currentSHA);
+    shaFile.close();
+
+    REQUIRE(currentSHA.substr(0, commitSHA.size()) == commitSHA);
 }
