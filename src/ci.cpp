@@ -1,5 +1,6 @@
 #include "../include/ci.hpp"
 
+
 /** testingSequence
  *  Use this sequence to compile, test and return 
  *  aka this is the thing that does the stuff 
@@ -7,6 +8,7 @@
  */
 void testingSequence(std::string ref, std::string cloneUrl, std::string commitSHA, std::string branch) {
     // git clone the branch at commit sha
+    cloneFromGit(cloneUrl, commitSHA, branch);
 
     // make the cloned folder
 
@@ -15,6 +17,30 @@ void testingSequence(std::string ref, std::string cloneUrl, std::string commitSH
     // message git with commit status
 
     // p+: save to database
+}
+/* cloneFromGit
+ * 
+ * This function constructs a git clone command and executes it.
+ * It also constructs command to go to the specific commit at commitSHA.
+ */
+int cloneFromGit(std::string cloneUrl, std::string commitSHA, std::string branch) {
+    // Clone options
+    std::string clone_command = "git clone --branch " + branch + " " + cloneUrl + " repos/" + commitSHA;
+
+    // Clone repository
+    int res = std::system(clone_command.c_str());
+    if (res == 0) {
+        return 1;
+    }
+
+    // Go to the commitSHA
+    std::string sha_command =  "cd repos/" + commitSHA + " && git reset --hard " + commitSHA;
+    res = std::system(sha_command.c_str());
+    if (res != 0) {
+        return 2;
+    }    
+
+    return 0;
 }
 
 
