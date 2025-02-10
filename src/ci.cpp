@@ -3,18 +3,57 @@
 /** testingSequence
  *  Use this sequence to compile, test and return 
  *  aka this is the thing that does the stuff 
- *  -------- MAKE BETTER COMMENT AS CODE IS DEVELOPED -----------------
+ *  --------MAKE BETTER COMMENT AS CODE IS DEVELOPED -----------------
  */
 void testingSequence(std::string ref, std::string cloneUrl, std::string commitSHA, std::string branch) {
     // git clone the branch at commit sha
+    cloneFromGit(cloneUrl, commitSHA, branch);
+    std::string projPath = "repos " + commitSHA;
 
     // make the cloned folder
+    compileProject(projPath);
 
     // make test the cloned folder, return status
+    int res = testProject(projPath);
+
+    // Copy log to Results folder
+    std::string log_command = "cp " + projPath + "/result.log logs/" + commitSHA + ".log";
+    std::system(log_command.c_str());
 
     // message git with commit status
 
     // p+: save to database
+}
+
+int cloneFromGit(std::string cloneUrl, std::string commitSHA, std::string branch) {
+    // Clone options
+    std::string clone_command = "git clone --branch " + branch + " " + cloneUrl + " repos/" + commitSHA;
+
+    // Clone repository
+    int res = std::system(clone_command.c_str());
+    if (res != 0) {
+        return 1;
+    }
+
+    // Go to the commitSHA
+    std::string sha_command =  "cd repos/" + commitSHA + " && git reset --hard " + commitSHA;
+    res = std::system(sha_command.c_str());
+    if (res != 0) {
+        return 2;
+    }    
+
+    return 0;
+}
+
+int compileProject(std::string projPath) {
+    // Make code 
+    std::string make_command =  "cd " + projPath + " && make";
+    return std::system(make_command.c_str()); 
+}
+
+int testProject(std::string projPath) {
+    std::string test_command =  "cd " + projPath + " && test > result.log";
+    return std::system(test_command.c_str());
 }
 
 
