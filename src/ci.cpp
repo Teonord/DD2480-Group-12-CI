@@ -57,7 +57,7 @@ int testProject(std::string projPath) {
     return std::system(test_command.c_str());
 }
 
-int notifyCommitStatus(std::string apiUrl) {
+void notifyCommitStatus(std::string apiUrl) {
     httplib::Client client("https://api.github.com");
     std::string apiPath = apiUrl.substr(22);
 

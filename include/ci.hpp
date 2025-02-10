@@ -13,10 +13,12 @@ const int port = 8012;
 
 void incomingWebhook(const httplib::Request &req, httplib::Response &res);
 
-int cloneFromGit(std::string cloneUrl, std::string commitSHA, std::string branch, std::string apiUrl);
+int cloneFromGit(std::string cloneUrl, std::string commitSHA, std::string branch);
 
 int compileProject(std::string projPath);
 
 int testProject(std::string projPath);
+
+void notifyCommitStatus(std::string apiUrl);
 
 #endif
