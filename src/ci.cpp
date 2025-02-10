@@ -29,7 +29,7 @@ int cloneFromGit(std::string cloneUrl, std::string commitSHA, std::string branch
 
     // Clone repository
     int res = std::system(clone_command.c_str());
-    if (res != 0) {
+    if (res == 0) {
         return 1;
     }
 
