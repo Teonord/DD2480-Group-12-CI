@@ -230,3 +230,52 @@ bool insertToDB(std::string commitSHA, std::string buildLog){
     return true;
     
 }
+
+void listCommits(const httplib::Request &req, httplib::Response &res) {
+    try
+    {
+        // get commits into array or vector
+
+        std::vector<std::string> commits;
+
+        std::string html;
+
+        for (std::string commit : commits) {
+            html += "<a href='/commit/" + commit + "'>" + commit + "<br>";
+        }
+
+        res.status = 200;
+        res.set_content(html, "text/html");
+    }
+    catch(std::exception &e)
+    {
+        res.status = 400;
+        res.set_content("err", "text/plain");
+    }
+}
+
+void sendCommitInfo(const httplib::Request &req, httplib::Response &res) {
+    try
+    {
+        std::string commit = req.path_params.at("id");
+
+        // Get columns from Database
+
+        std::vector<std::string> columns;
+
+        std::string html;
+
+        html += "Test ID: " + columns[0];
+        html += "<br>Commit SHA: " + columns[1];
+        html += "<br>Timestamp: " + columns[2];
+        html += "<br>Log:<br>" + columns[4];
+
+        res.status = 200;
+        res.set_content(html, "text/html");
+    }
+    catch(std::exception &e)
+    {
+        res.status = 400;
+        res.set_content("err", "text/plain");
+    }
+}
