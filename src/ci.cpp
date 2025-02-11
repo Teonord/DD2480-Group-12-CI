@@ -35,6 +35,10 @@ int compile_Makefile(std::string repoPath) {
         return 1;
     }
 
+    // Cleans compiled files
+    std::string clean_command = "cd " + repoPath + " && make clean -s";
+    std::system(clean_command.c_str());
+
     return 0;
 }   
 
@@ -49,7 +53,7 @@ int cloneFromGit(std::string cloneUrl, std::string commitSHA, std::string branch
 
     // Clone repository
     int res = std::system(clone_command.c_str());
-    if (res == 0) {
+    if (res != 0) {
         return 1;
     }
 

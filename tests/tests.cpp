@@ -135,18 +135,32 @@ TEST_CASE("Tests the repo cloning and correct commitSHA", "[cloneFromGit]") {
     shaFile.close();
 
     REQUIRE(currentSHA.substr(0, commitSHA.size()) == commitSHA);
+
+    std::string removeClone = "rm -rf " + repoPath;
+    std::system(removeClone.c_str());
 }
 
 // test Makefile
-TEST_CASE("Tries to make the cloned repository", "[compile_Makefile]") {
-    std::string commitSHA = "f6d5f98";
-    std::string repoPath = "repos/" + commitSHA;
+TEST_CASE("Tries to make project", "[compile_Makefile]") {
+    std::string goodPath = "tests/testproject/";
 
     // Run the compilation
-    int compileResult = compile_Makefile(repoPath);
+    int compileResult = compile_Makefile(goodPath);
     REQUIRE(compileResult == 0); // Expect successful compilation
+}
 
-    // Verify that build output exists
-    std::string expectedBinary = repoPath + "/test_program"; // Adjust this based on the Makefile's output
-    REQUIRE(std::filesystem::exists(expectedBinary));
+TEST_CASE("Tries to make bad project", "[compile_Makefile]") {
+    std::string badPath = "tests/badtestproject/";
+
+    // Run the compilation
+    int compileResult = compile_Makefile(badPath);
+    REQUIRE(compileResult == 1); // Expect no compilation
+}
+
+TEST_CASE("Tries to make non-existent project", "[compile_Makefile]") {
+    std::string badPath = "tests";
+
+    // Run the compilation
+    int compileResult = compile_Makefile(badPath);
+    REQUIRE(compileResult == 1); // Expect no compilation
 }
