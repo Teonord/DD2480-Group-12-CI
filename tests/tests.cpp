@@ -104,12 +104,12 @@ TEST_CASE("error handled with 400", "[incomingWebhook]") {
 // Tests cloning
 TEST_CASE("Tests the repo cloning and correct commitSHA", "[cloneFromGit]") {
     std::string cloneUrl = "https://github.com/linusPersonalGit/test_repo.git"; 
-    std::string commitSHA = "54917ea"; 
+    std::string commitSHA = "f6d5f98"; 
     std::string branch = "test_branch";
     std::string repoPath = "repos/" + commitSHA;
 
     int result = cloneFromGit(cloneUrl, commitSHA, branch);
-    REQUIRE(result != 0);
+    REQUIRE(result == 0);
 
     // Verify repo
     REQUIRE(std::filesystem::exists(repoPath));
@@ -135,4 +135,18 @@ TEST_CASE("Tests the repo cloning and correct commitSHA", "[cloneFromGit]") {
     shaFile.close();
 
     REQUIRE(currentSHA.substr(0, commitSHA.size()) == commitSHA);
+}
+
+// test Makefile
+TEST_CASE("Tries to make the cloned repository", "[compile_Makefile]") {
+    std::string commitSHA = "f6d5f98";
+    std::string repoPath = "repos/" + commitSHA;
+
+    // Run the compilation
+    int compileResult = compile_Makefile(repoPath);
+    REQUIRE(compileResult == 0); // Expect successful compilation
+
+    // Verify that build output exists
+    std::string expectedBinary = repoPath + "/test_program"; // Adjust this based on the Makefile's output
+    REQUIRE(std::filesystem::exists(expectedBinary));
 }
