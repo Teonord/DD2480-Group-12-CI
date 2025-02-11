@@ -11,6 +11,8 @@ void testingSequence(std::string ref, std::string cloneUrl, std::string commitSH
     cloneFromGit(cloneUrl, commitSHA, branch);
 
     // make the cloned folder
+    std::string repoPath = "repos/" + commitSHA;
+    compile_Makefile(repoPath);
 
     // make test the cloned folder, return status
 
@@ -18,6 +20,28 @@ void testingSequence(std::string ref, std::string cloneUrl, std::string commitSH
 
     // p+: save to database
 }
+
+/* compile_Makefile
+ *
+ * This function takes as input the location where the cloned repository is stored. 
+ * Then it tries to make the cloned repository and returns 1 if unsuccesful. 
+ */
+int compile_Makefile(std::string repoPath) {
+    // Go to Makefile
+    std::string make_command = "cd " + repoPath + " && make -s";
+
+    int res = std::system(make_command.c_str());
+    if(res != 0) {
+        return 1;
+    }
+
+    // Cleans compiled files
+    std::string clean_command = "cd " + repoPath + " && make clean -s";
+    std::system(clean_command.c_str());
+
+    return 0;
+}   
+
 /* cloneFromGit
  * 
  * This function constructs a git clone command and executes it.
@@ -29,7 +53,7 @@ int cloneFromGit(std::string cloneUrl, std::string commitSHA, std::string branch
 
     // Clone repository
     int res = std::system(clone_command.c_str());
-    if (res == 0) {
+    if (res != 0) {
         return 1;
     }
 
