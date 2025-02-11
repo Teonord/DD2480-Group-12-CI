@@ -104,12 +104,12 @@ TEST_CASE("error handled with 400", "[incomingWebhook]") {
 // Tests cloning
 TEST_CASE("Tests the repo cloning and correct commitSHA", "[cloneFromGit]") {
     std::string cloneUrl = "https://github.com/linusPersonalGit/test_repo.git"; 
-    std::string commitSHA = "54917ea"; 
+    std::string commitSHA = "f6d5f98"; 
     std::string branch = "test_branch";
     std::string repoPath = "repos/" + commitSHA;
 
     int result = cloneFromGit(cloneUrl, commitSHA, branch);
-    REQUIRE(result != 0);
+    REQUIRE(result == 0);
 
     // Verify repo
     REQUIRE(std::filesystem::exists(repoPath));
@@ -135,8 +135,35 @@ TEST_CASE("Tests the repo cloning and correct commitSHA", "[cloneFromGit]") {
     shaFile.close();
 
     REQUIRE(currentSHA.substr(0, commitSHA.size()) == commitSHA);
+  
+    std::string removeClone = "rm -rf " + repoPath;
+    std::system(removeClone.c_str());
 }
 
+// test Makefile
+TEST_CASE("Tries to make project", "[compile_Makefile]") {
+    std::string goodPath = "tests/testproject/";
+
+    // Run the compilation
+    int compileResult = compile_Makefile(goodPath);
+    REQUIRE(compileResult == 0); // Expect successful compilation
+}
+
+TEST_CASE("Tries to make bad project", "[compile_Makefile]") {
+    std::string badPath = "tests/badtestproject/";
+
+    // Run the compilation
+    int compileResult = compile_Makefile(badPath);
+    REQUIRE(compileResult == 1); // Expect no compilation
+}
+
+TEST_CASE("Tries to make non-existent project", "[compile_Makefile]") {
+    std::string badPath = "tests";
+
+    // Run the compilation
+    int compileResult = compile_Makefile(badPath);
+    REQUIRE(compileResult == 1); // Expect no compilation
+}
 
 //tests connecting to database
 TEST_CASE("Tests connecting", "[connectDB]") {
