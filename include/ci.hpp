@@ -6,6 +6,7 @@
 #include <array>
 #include "../external/httplib.h"
 #include "../external/json.hpp"
+#include <libpq-fe.h>
 
 using json = nlohmann::json;
 

@@ -1,6 +1,8 @@
 #include "../include/ci.hpp"
 
 
+PGconn *conn = nullptr;
+
 /** testingSequence
  *  Use this sequence to compile, test and return 
  *  aka this is the thing that does the stuff 
@@ -17,6 +19,7 @@ void testingSequence(std::string ref, std::string cloneUrl, std::string commitSH
     // message git with commit status
 
     // p+: save to database
+
 }
 /* cloneFromGit
  * 
@@ -113,4 +116,17 @@ void incomingWebhook(const httplib::Request &req, httplib::Response &res) {
         res.status = 400;
         res.set_content("err", "text/plain");
     }
+
 } 
+
+
+//retruns -2 if already connected to the database
+//returns -1 if failed to connect to database
+//returns 1 if connected to database
+int connectDB(){
+    if(conn != nullptr) return -2; //already connected
+    const char *connInfo = "dbname=dd2480-ci user=group12 password=group12 host=localhost port=5432";
+    conn = PQconnectdb(connInfo);
+    if(!conn) return -1; //failed to connect to database
+    return 1; //connected to database
+}
