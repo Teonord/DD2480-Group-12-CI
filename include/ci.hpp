@@ -6,6 +6,7 @@
 #include <array>
 #include "../external/httplib.h"
 #include "../external/json.hpp"
+#include <sqlite3.h>
 
 using json = nlohmann::json;
 
@@ -15,5 +16,7 @@ void incomingWebhook(const httplib::Request &req, httplib::Response &res);
 void testingSequence(std::string ref, std::string cloneUrl, std::string commitSHA, std::string branch);
 int cloneFromGit(std::string cloneUrl, std::string commitSHA, std::string branch);
 int compile_Makefile(std::string repoPath);
+bool connectDB();
+bool insertToDB(std::string commitSHA, std::string buildLog);
 
 #endif

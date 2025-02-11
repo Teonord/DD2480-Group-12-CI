@@ -1,5 +1,7 @@
 #include "../include/ci.hpp"
 
+sqlite3 *db = nullptr;
+
 
 /** testingSequence
  *  Use this sequence to compile, test and return 
@@ -19,6 +21,7 @@ void testingSequence(std::string ref, std::string cloneUrl, std::string commitSH
     // message git with commit status
 
     // p+: save to database
+
 }
 
 /* compile_Makefile
@@ -137,4 +140,93 @@ void incomingWebhook(const httplib::Request &req, httplib::Response &res) {
         res.status = 400;
         res.set_content("err", "text/plain");
     }
+
 } 
+
+
+//returns true if connected to the database, else false
+bool connectDB(){
+    int rc = sqlite3_open("dd2480-ci.db", &db);
+    if(rc){
+        std::cout << "failed to connect to the database" << std::endl;
+        return false;
+    } 
+    return true;
+}
+
+bool createTables(){
+    const char* query = R"(
+        CREATE TABLE IF NOT EXISTS ci_builds (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            commit_id VARCHAR(40) NOT NULL,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            build_log TEXT
+        );
+        )";
+    const char* query2 = R"(
+        CREATE TABLE IF NOT EXISTS ci_tests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            commit_id VARCHAR(40) NOT NULL,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            build_log TEXT
+        );
+        )";
+
+    char *errMsg = nullptr;
+
+    int exit = sqlite3_exec(db, query, nullptr, 0, &errMsg);
+
+    if (exit != SQLITE_OK) {
+        std::cerr << "SQL error: " << errMsg << std::endl;
+        sqlite3_free(errMsg);
+        return false; // Failed to create table
+    }
+
+    exit = sqlite3_exec(db, query2, nullptr, 0, &errMsg);
+
+    if (exit != SQLITE_OK) {
+        std::cerr << "SQL error: " << errMsg << std::endl;
+        sqlite3_free(errMsg);
+        return false; // Failed to create table
+    }
+
+    std::cout << "Tables created successfully!" << std::endl;
+    return true; 
+}
+
+//returns true if insert into db was succ
+//returns false if not
+bool insertToDB(std::string commitSHA, std::string buildLog){
+    connectDB();
+    createTables();
+
+    #ifndef TESTING
+    const char *query = "INSERT INTO ci_table (commit_id, build_log) VALUES (?, ?)";
+    #else 
+    const char *query = "INSERT INTO ci_tests (commit_id, build_log) VALUES (?, ?)";
+    #endif
+
+    sqlite3_stmt *stmt;
+
+    int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "SQL error: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    } 
+
+    sqlite3_bind_text(stmt, 1, commitSHA.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, buildLog.c_str(), -1, SQLITE_STATIC);
+    
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        std::cerr << "Execution failed: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    sqlite3_finalize(stmt);
+
+    return true;
+    
+}

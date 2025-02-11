@@ -135,7 +135,7 @@ TEST_CASE("Tests the repo cloning and correct commitSHA", "[cloneFromGit]") {
     shaFile.close();
 
     REQUIRE(currentSHA.substr(0, commitSHA.size()) == commitSHA);
-
+  
     std::string removeClone = "rm -rf " + repoPath;
     std::system(removeClone.c_str());
 }
@@ -163,4 +163,14 @@ TEST_CASE("Tries to make non-existent project", "[compile_Makefile]") {
     // Run the compilation
     int compileResult = compile_Makefile(badPath);
     REQUIRE(compileResult == 1); // Expect no compilation
+}
+
+//tests connecting to database
+TEST_CASE("Tests connecting", "[connectDB]") {
+    REQUIRE(connectDB() == true);
+}
+
+//tests inserting into database
+TEST_CASE("Tests writing to database on testTable ci_tests", "[insertToDB]") {
+    REQUIRE(insertToDB("somehash", "somebuildlog") == true);
 }
