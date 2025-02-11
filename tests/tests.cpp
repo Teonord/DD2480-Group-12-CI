@@ -136,3 +136,14 @@ TEST_CASE("Tests the repo cloning and correct commitSHA", "[cloneFromGit]") {
 
     REQUIRE(currentSHA.substr(0, commitSHA.size()) == commitSHA);
 }
+
+
+//tests connecting to database
+TEST_CASE("Tests connecting", "[connectDB]") {
+    REQUIRE(connectDB() == true);
+}
+
+//tests inserting into database
+TEST_CASE("Tests writing to database on testTable ci_tests", "[insertToDB]") {
+    REQUIRE(insertToDB("somehash", "somebuildlog") == true);
+}
