@@ -231,6 +231,15 @@ bool insertToDB(std::string commitSHA, std::string buildLog){
     
 }
 
+/** listCommits
+ *  Function to handle HTTP get messages to grab a list of all builds done by the CI
+ *  server in the past. req does not matter as function is only called when going to
+ *  a specific / of the url. Begins by grabbing all the ids and commit numbers from
+ *  the database, adds them to the HTML as links.
+ * 
+ *  @param req required argument for httplib callback function
+ *  @param res response with HTML to the caller.
+ */
 void listCommits(const httplib::Request &req, httplib::Response &res) {
     try
     {
@@ -277,6 +286,14 @@ void listCommits(const httplib::Request &req, httplib::Response &res) {
     }
 }
 
+/** listCommits
+ *  Function to get data from the database and send it back as HTML for
+ *  a specific CI execution. First grabs neccessary columns from publicKey row
+ *  then sets these ordered in a HTML document and sends back through res.
+ * 
+ *  @param publicKey which publicKey row to grab from. 
+ *  @param res response with HTML to the caller.
+ */
 void sendCommitInfo(std::string publicKey, httplib::Response &res) {
     try
     {
