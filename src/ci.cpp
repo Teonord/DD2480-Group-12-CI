@@ -38,7 +38,7 @@ int testingSequence(std::string cloneUrl, std::string commitSHA, std::string bra
     // make test the cloned folder, return status
     res = makeTests(repoPath);
 
-    runTests("build/tests");
+    runTests(repoPath + "build/tests");
 
     // p+: save to database
     std::string filePath = "tests.log";
@@ -173,7 +173,7 @@ void incomingWebhook(const httplib::Request &req, httplib::Response &res) {
 
             #ifndef TESTING
                 // do CI on recieved repository
-                std::thread pr(testingSequence, ref, cloneUrl, commitSHA, branch);
+                std::thread pr(testingSequence, cloneUrl, commitSHA, branch);
                 pr.detach();
             #endif
             
@@ -191,7 +191,7 @@ void incomingWebhook(const httplib::Request &req, httplib::Response &res) {
 
                 #ifndef TESTING
                     // do CI on recieved repository
-                    std::thread pr(testingSequence, ref, cloneUrl, commitSHA, branch);
+                    std::thread pr(testingSequence, cloneUrl, commitSHA, branch);
                     pr.detach();
                 #endif
 
