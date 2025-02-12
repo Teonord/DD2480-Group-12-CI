@@ -175,6 +175,36 @@ TEST_CASE("Tests writing to database on testTable ci_tests", "[insertToDB]") {
     REQUIRE(insertToDB("somehash", "somebuildlog") == true);
 }
 
+
+//tests reading from an existing file, should be able to read
+TEST_CASE("tests reading an existsing file", "[readFile]") {
+    std::string filePath = "src/main.cpp";
+    std::string str = readFile(filePath);
+
+    REQUIRE(str != "");
+}
+
+//tests reading from an non existing file, should not be able to read
+TEST_CASE("tests reading non existsing file", "[readFile]") {
+    std::string filePath = "src/main.cpppp";
+    std::string str = readFile(filePath);
+
+    REQUIRE(str == "");
+}
+
+//testing sequence, should pass
+TEST_CASE("tests the testing sequence", "[testingSequence]") {
+
+    std::string cloneUrl = "https://github.com/linusPersonalGit/test_repo.git"; 
+    std::string commitSHA = "f6d5f98"; 
+    std::string branch = "test_branch";
+    std::string repoPath = "repos/" + commitSHA;
+    int res = testingSequence(cloneUrl, commitSHA, branch);
+
+    REQUIRE(res == 0);
+}
+
+
 TEST_CASE("Make List HTML", "[listCommits]") {
     httplib::Request req;
     httplib::Response res;

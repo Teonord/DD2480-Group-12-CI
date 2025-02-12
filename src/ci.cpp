@@ -3,26 +3,88 @@
 sqlite3 *db = nullptr;
 
 
+/** readFile
+ *  Given a filepath reads the filecontent and returns it as a string.
+ *  If no file was found or error opening file returns empty string.
+ */
+std::string readFile(const std::string& filePath) {
+    std::ifstream file(filePath);
+    if (!file.is_open()) {
+        std::cerr << "Error opening file: " << filePath << std::endl;
+        return "";
+    }
+
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    return buffer.str();
+}
+
+void print(std::string st) {
+    std::cout << st << std::endl;
+}
+
+
+
+
 /** testingSequence
  *  Use this sequence to compile, test and return 
  *  aka this is the thing that does the stuff 
  *  -------- MAKE BETTER COMMENT AS CODE IS DEVELOPED -----------------
  */
-void testingSequence(std::string cloneUrl, std::string commitSHA, std::string branch) {
+int testingSequence(std::string cloneUrl, std::string commitSHA, std::string branch) {
     // git clone the branch at commit sha
+    print("Cloning...");
     cloneFromGit(cloneUrl, commitSHA, branch);
 
     // make the cloned folder
+    print("Compiling...");
     std::string repoPath = "repos/" + commitSHA;
-    compile_Makefile(repoPath);
+    int res = compile_Makefile(repoPath);
 
-    // make test the cloned folder, return status
+    std::string filePath;
 
-    // message git with commit status
+    if (res == 0) {
+        print("Testing....");
+        // make test the cloned folder, return status
+        res = makeTests(repoPath);
+        print(std::to_string(res));
+        filePath = repoPath + "/tests.log";
 
+        std::string rm_build_command = "rm " + repoPath + "/build.log";
+        std::system(rm_build_command.c_str());
+    } else {
+        filePath = repoPath + "/build.log";
+    }
+    
     // p+: save to database
+    print("Inserting...");
+    
+    std::string buildLog = readFile(filePath);
+    insertToDB(commitSHA, buildLog);
+    
+    std::string rm_command = "rm " + filePath;
+    std::system(rm_command.c_str());
 
+    return 0;
 }
+
+
+/* makeTests
+ *
+ * This function takes as input the location where the cloned repository is stored. 
+ * Then it tries to make the cloned repository and returns 1 if unsuccesful. 
+ */
+int makeTests(std::string repoPath) {
+    
+    std::string make_command = "cd " + repoPath + " && make test > tests.log 2>&1";
+    int res = std::system(make_command.c_str());
+
+    // Cleans compiled files
+    std::string clean_command = "cd " + repoPath + " && make clean -s";
+    std::system(clean_command.c_str());
+
+    return res;
+}   
 
 /* compile_Makefile
  *
@@ -31,10 +93,12 @@ void testingSequence(std::string cloneUrl, std::string commitSHA, std::string br
  */
 int compile_Makefile(std::string repoPath) {
     // Go to Makefile
-    std::string make_command = "cd " + repoPath + " && make -s";
+    std::string make_command = "cd " + repoPath + " && make > build.log 2>&1";
 
     int res = std::system(make_command.c_str());
     if(res != 0) {
+        std::cout << "make command " << make_command << std::endl;
+        std::cout << "returning 1" << std::endl;
         return 1;
     }
 
@@ -51,6 +115,11 @@ int compile_Makefile(std::string repoPath) {
  * It also constructs command to go to the specific commit at commitSHA.
  */
 int cloneFromGit(std::string cloneUrl, std::string commitSHA, std::string branch) {
+
+    if (std::filesystem::exists("repos/" + commitSHA)) {
+        std::filesystem::remove_all("repos/" + commitSHA);
+    }
+
     // Clone options
     std::string clone_command = "git clone --branch " + branch + " " + cloneUrl + " repos/" + commitSHA;
 
@@ -193,7 +262,7 @@ bool createTables(){
         return false; // Failed to create table
     }
 
-    std::cout << "Tables created successfully!" << std::endl;
+    //std::cout << "Tables created successfully!" << std::endl;
     return true; 
 }
 
