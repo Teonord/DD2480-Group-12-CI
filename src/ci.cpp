@@ -230,7 +230,7 @@ bool connectDB(){
 
 bool createTables(){
     const char* query = R"(
-        CREATE TABLE IF NOT EXISTS ci_builds (
+        CREATE TABLE IF NOT EXISTS ci_table (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             commit_id VARCHAR(40) NOT NULL,
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -303,4 +303,117 @@ bool insertToDB(std::string commitSHA, std::string buildLog){
 
     return true;
     
+}
+
+/** listCommits
+ *  Function to handle HTTP get messages to grab a list of all builds done by the CI
+ *  server in the past. req does not matter as function is only called when going to
+ *  a specific / of the url. Begins by grabbing all the ids and commit numbers from
+ *  the database, adds them to the HTML as links.
+ * 
+ *  @param req required argument for httplib callback function
+ *  @param res response with HTML to the caller.
+ */
+void listCommits(const httplib::Request &req, httplib::Response &res) {
+    try
+    {
+
+        #ifndef TESTING
+        const char *query = "SELECT id, commit_id FROM ci_table";
+        #else 
+        const char *query = "SELECT id, commit_id FROM ci_tests";
+        #endif
+
+        sqlite3_stmt *stmt;
+
+        int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+        if (rc != SQLITE_OK) {
+            std::cerr << "SQL error: " << sqlite3_errmsg(db) << std::endl;
+            if (stmt) sqlite3_finalize(stmt);
+            res.status = 401;
+            res.set_content("sql err", "text/plain");
+            return;
+        } 
+
+        std::string html;
+
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            std::string publicKey = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+            std::string commit = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+
+            html += "<a href='/id/" + publicKey + "'>" + commit + "<br>";
+        }
+
+        sqlite3_finalize(stmt);
+
+        res.status = 200;
+        res.set_content(html, "text/html");
+    }
+    catch(std::exception &e)
+    {
+        res.status = 400;
+        res.set_content("err", "text/plain");
+    }
+}
+
+/** sendCommitInfo
+ *  Function to get data from the database and send it back as HTML for
+ *  a specific CI execution. First grabs neccessary columns from publicKey row
+ *  then sets these ordered in a HTML document and sends back through res.
+ * 
+ *  @param publicKey which publicKey row to grab from. 
+ *  @param res response with HTML to the caller.
+ */
+void sendCommitInfo(std::string publicKey, httplib::Response &res) {
+    try
+    {
+        #ifndef TESTING
+        const char *query = "SELECT commit_id, timestamp, build_log FROM ci_table WHERE id = ?";
+        #else 
+        const char *query = "SELECT commit_id, timestamp, build_log FROM ci_tests WHERE id = ?";
+        #endif
+
+        sqlite3_stmt *stmt;
+
+        int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+        if (rc != SQLITE_OK) {
+            std::cerr << "SQL error: " << sqlite3_errmsg(db) << std::endl;
+            if (stmt) sqlite3_finalize(stmt);
+            res.status = 401;
+            res.set_content("sql err", "text/plain");
+            return;
+        } 
+
+
+        sqlite3_bind_text(stmt, 1, publicKey.c_str(), -1, SQLITE_STATIC);
+
+        rc = sqlite3_step(stmt);
+        if (rc != SQLITE_ROW) {
+            res.status = 404;
+            res.set_content("sql err 404", "text/plain");
+            sqlite3_finalize(stmt);
+            return;
+        }
+
+        std::string commit = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+        std::string timestamp = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+        std::string buildLog = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+
+        std::string html;
+
+        html += "Test ID: " + publicKey;
+        html += "<br>Commit SHA: " + commit;
+        html += "<br>Timestamp: " + timestamp;
+        html += "<br>Log:<br>" + buildLog;
+
+        sqlite3_finalize(stmt);
+
+        res.status = 200;
+        res.set_content(html, "text/html");
+    }
+    catch(std::exception &e)
+    {
+        res.status = 400;
+        res.set_content("err", "text/plain");
+    }
 }

@@ -175,6 +175,7 @@ TEST_CASE("Tests writing to database on testTable ci_tests", "[insertToDB]") {
     REQUIRE(insertToDB("somehash", "somebuildlog") == true);
 }
 
+
 //tests reading from an existing file, should be able to read
 TEST_CASE("tests reading an existsing file", "[readFile]") {
     std::string filePath = "src/main.cpp";
@@ -204,7 +205,7 @@ TEST_CASE("tests the testing sequence", "[testingSequence]") {
 }
 
 //tests reading from a static commit from our repo, should pass
-TEST_CASE("teststssds", "[testingSequence]") {
+TEST_CASE("tests reading from a static commit from our repo, should pass", "[testingSequence]") {
     std::string cloneUrl = "git@github.com:Teonord/DD2480-Group-12-CI.git"; 
     std::string commitSHA = "80cd803"; 
     std::string branch = "main";
@@ -214,4 +215,44 @@ TEST_CASE("teststssds", "[testingSequence]") {
     REQUIRE(res == 0);
 }
 
+
+
+TEST_CASE("Make List HTML", "[listCommits]") {
+    httplib::Request req;
+    httplib::Response res;
+
+    listCommits(req, res);
+
+    REQUIRE(res.status == 200);
+}
+
+TEST_CASE("Get Info from Database", "[sendCommitInfo]") {
+    connectDB();
+
+    httplib::Response res;
+
+    sendCommitInfo("1", res);
+
+    REQUIRE(res.status == 200);
+}
+
+TEST_CASE("Get non existent Info from Database", "[sendCommitInfo]") {
+    connectDB();
+
+    httplib::Response res;
+
+    sendCommitInfo("-1", res);
+
+    REQUIRE(res.status == 404);
+}
+
+TEST_CASE("Incorrect Public Key", "[sendCommitInfo]") {
+    connectDB();
+
+    httplib::Response res;
+
+    sendCommitInfo("public key :)", res);
+
+    REQUIRE(res.status == 404);
+}
 
