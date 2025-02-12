@@ -5,7 +5,10 @@ int main(int argc, char** argv) {
 
   server.Post("/ci_webhook", incomingWebhook);
   server.Get("/list", listCommits);
-  server.Get("/commit/:id", sendCommitInfo);
+  server.Get("/id/:pk", [](const httplib::Request &req, httplib::Response &res) {
+    std::string publicKey = req.path_params.at("pk");
+    sendCommitInfo(publicKey, res);
+  });
 
   std::cout << "Server starting on port " << port << std::endl;
   

@@ -174,3 +174,46 @@ TEST_CASE("Tests connecting", "[connectDB]") {
 TEST_CASE("Tests writing to database on testTable ci_tests", "[insertToDB]") {
     REQUIRE(insertToDB("somehash", "somebuildlog") == true);
 }
+
+TEST_CASE("Make List HTML", "[listCommits]") {
+    httplib::Request req;
+    httplib::Response res;
+
+    listCommits(req, res);
+
+    REQUIRE(res.status == 200);
+}
+
+TEST_CASE("Get Info from Database", "[sendCommitInfo]") {
+    connectDB();
+
+    httplib::Response res;
+
+    sendCommitInfo("1", res);
+
+    REQUIRE(res.status == 200);
+    std::cout << res.body;
+}
+
+TEST_CASE("Get non existent Info from Database", "[sendCommitInfo]") {
+    connectDB();
+
+    httplib::Response res;
+
+    sendCommitInfo("-1", res);
+
+    REQUIRE(res.status == 404);
+    std::cout << res.body;
+}
+
+TEST_CASE("Incorrect Public Key", "[sendCommitInfo]") {
+    connectDB();
+
+    httplib::Response res;
+
+    sendCommitInfo("public key :)", res);
+
+    REQUIRE(res.status == 404);
+    std::cout << res.body;
+}
+

@@ -234,14 +234,37 @@ bool insertToDB(std::string commitSHA, std::string buildLog){
 void listCommits(const httplib::Request &req, httplib::Response &res) {
     try
     {
-        // get commits into array or vector
-
+        std::vector<std::string> publicKeys;
         std::vector<std::string> commits;
+
+        #ifndef TESTING
+        const char *query = "SELECT id, commit_id FROM ci_table";
+        #else 
+        const char *query = "SELECT id, commit_id FROM ci_tests";
+        #endif
+
+        sqlite3_stmt *stmt;
+
+        int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+        if (rc != SQLITE_OK) {
+            std::cerr << "SQL error: " << sqlite3_errmsg(db) << std::endl;
+            res.status = 401;
+            res.set_content("sql err", "text/plain");
+            return;
+        } 
+
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            const char* publicKey = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+            const char* commit = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+
+            publicKeys.push_back(publicKey);
+            commits.push_back(commit);
+        }
 
         std::string html;
 
-        for (std::string commit : commits) {
-            html += "<a href='/commit/" + commit + "'>" + commit + "<br>";
+        for (int i = 0; i < publicKeys.size(); i++) {
+            html += "<a href='/id/" + publicKeys[i] + "'>" + commits[i] + "<br>";
         }
 
         res.status = 200;
@@ -254,21 +277,45 @@ void listCommits(const httplib::Request &req, httplib::Response &res) {
     }
 }
 
-void sendCommitInfo(const httplib::Request &req, httplib::Response &res) {
+void sendCommitInfo(std::string publicKey, httplib::Response &res) {
     try
     {
-        std::string commit = req.path_params.at("id");
+        #ifndef TESTING
+        const char *query = "SELECT commit_id, timestamp, build_log FROM ci_table WHERE id = ?";
+        #else 
+        const char *query = "SELECT commit_id, timestamp, build_log FROM ci_tests WHERE id = ?";
+        #endif
 
-        // Get columns from Database
+        sqlite3_stmt *stmt;
 
-        std::vector<std::string> columns;
+        int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+        if (rc != SQLITE_OK) {
+            std::cerr << "SQL error: " << sqlite3_errmsg(db) << std::endl;
+            res.status = 401;
+            res.set_content("sql err", "text/plain");
+            return;
+        } 
+
+
+        sqlite3_bind_text(stmt, 1, publicKey.c_str(), -1, SQLITE_STATIC);
+
+        sqlite3_step(stmt);
+        std::string commit = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+        std::string timestamp = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+        std::string buildLog = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+
+        if (commit == NULL || timestamp == NULL || buildLog == NULL) {
+            res.status = 404;
+            res.set_content("SQL Row not found!", "text/plain");
+            return;
+        }
 
         std::string html;
 
-        html += "Test ID: " + columns[0];
-        html += "<br>Commit SHA: " + columns[1];
-        html += "<br>Timestamp: " + columns[2];
-        html += "<br>Log:<br>" + columns[4];
+        html += "Test ID: " + publicKey;
+        html += "<br>Commit SHA: " + commit;
+        html += "<br>Timestamp: " + timestamp;
+        html += "<br>Log:<br>" + buildLog;
 
         res.status = 200;
         res.set_content(html, "text/html");
