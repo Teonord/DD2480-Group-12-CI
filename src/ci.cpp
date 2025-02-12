@@ -156,7 +156,7 @@ bool connectDB(){
 
 bool createTables(){
     const char* query = R"(
-        CREATE TABLE IF NOT EXISTS ci_builds (
+        CREATE TABLE IF NOT EXISTS ci_table (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             commit_id VARCHAR(40) NOT NULL,
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
