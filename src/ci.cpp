@@ -38,8 +38,6 @@ int testingSequence(std::string cloneUrl, std::string commitSHA, std::string bra
     // make test the cloned folder, return status
     res = makeTests(repoPath);
 
-    runTests(repoPath + "/build/tests");
-
     // p+: save to database
     std::string filePath = "tests.log";
     std::string buildLog = readFile(filePath);
@@ -70,19 +68,35 @@ int runTests(std::string filePath) {
 
 
 
-/* compile_Makefile
+/* makeTests
  *
  * This function takes as input the location where the cloned repository is stored. 
  * Then it tries to make the cloned repository and returns 1 if unsuccesful. 
  */
 int makeTests(std::string repoPath) {
     // Go to Makefile
-    std::string make_command = "cd " + repoPath + " && make build/tests > build.log > 2&1";
+    std::string make_command = "cd " + repoPath + " && make test > 2&1";
 
     int res = std::system(make_command.c_str());
     if(res != 0) {
         return 1;
     }
+
+    if (std::getenv("INSIDE_TEST_BINARY")) {
+        std::cerr << "Already inside test binary, skipping runTests() to prevent recursion.\n";
+        return 0;
+    }
+
+    // Set the environment variable to indicate we're running tests
+    setenv("INSIDE_TEST_BINARY", "1", 1);
+
+    std::string runCmd = "./" + repoPath + "/build/tests > tests.log > 2&1";
+    res = std::system(runCmd.c_str());
+    if(res != 0) {
+        return 2;
+    }
+
+    setenv("INSIDE_TEST_BINARY", "0", 1);
 
     // Cleans compiled files
     std::string clean_command = "cd " + repoPath + " && make clean -s";
