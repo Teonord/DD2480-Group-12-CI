@@ -18,5 +18,6 @@ int cloneFromGit(std::string cloneUrl, std::string commitSHA, std::string branch
 int compile_Makefile(std::string repoPath);
 bool connectDB();
 bool insertToDB(std::string commitSHA, std::string buildLog);
+std::string readFile(const std::string& filePath);
 
 #endif

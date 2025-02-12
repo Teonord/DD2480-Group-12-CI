@@ -3,6 +3,23 @@
 sqlite3 *db = nullptr;
 
 
+/** readFile
+ *  Given a filepath reads the filecontent and returns it as a string.
+ *  If no file was found or error opening file returns empty string.
+ */
+std::string readFile(const std::string& filePath) {
+    std::ifstream file(filePath);
+    if (!file.is_open()) {
+        std::cerr << "Error opening file: " << filePath << std::endl;
+        return "";
+    }
+
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    return buffer.str();
+}
+
+
 /** testingSequence
  *  Use this sequence to compile, test and return 
  *  aka this is the thing that does the stuff 
@@ -14,13 +31,15 @@ void testingSequence(std::string ref, std::string cloneUrl, std::string commitSH
 
     // make the cloned folder
     std::string repoPath = "repos/" + commitSHA;
-    compile_Makefile(repoPath);
+    int res = compile_Makefile(repoPath);
 
     // make test the cloned folder, return status
 
     // message git with commit status
 
+
     // p+: save to database
+    
 
 }
 
