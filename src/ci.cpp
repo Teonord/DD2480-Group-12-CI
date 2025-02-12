@@ -31,7 +31,7 @@ void print(std::string st) {
  *  aka this is the thing that does the stuff 
  *  -------- MAKE BETTER COMMENT AS CODE IS DEVELOPED -----------------
  */
-void testingSequence(std::string cloneUrl, std::string commitSHA, std::string branch) {
+int testingSequence(std::string cloneUrl, std::string commitSHA, std::string branch) {
     // git clone the branch at commit sha
     print("Cloning...");
     cloneFromGit(cloneUrl, commitSHA, branch);
@@ -41,16 +41,27 @@ void testingSequence(std::string cloneUrl, std::string commitSHA, std::string br
     std::string repoPath = "repos/" + commitSHA;
     int res = compile_Makefile(repoPath);
 
-    print("Testing....");
-    // make test the cloned folder, return status
-    res = makeTests(repoPath);
-    print(std::to_string(res));
+    std::string filePath;
 
+    if (res == 0) {
+        print("Testing....");
+        // make test the cloned folder, return status
+        res = makeTests(repoPath);
+        print(std::to_string(res));
+        filePath = "tests.log";
+    } else {
+        filePath = repoPath + "/build.log";
+    }
+    
     // p+: save to database
     print("Inserting...");
-    std::string filePath = "tests.log";
+    
     std::string buildLog = readFile(filePath);
     insertToDB(commitSHA, buildLog);
+    std::string rm_command = "rm " + filePath;
+    std::system(rm_command.c_str());
+
+    return 0;
 }
 
 
@@ -64,10 +75,7 @@ int makeTests(std::string repoPath) {
     
     std::string make_command = "cd " + repoPath + " && make test";
 
-    int res = std::system(make_command.c_str());
-    if(res != 0) {
-        return 1;
-    }
+    std::system(make_command.c_str());
 
     if (std::getenv("INSIDE_TEST_BINARY")) {
         std::cerr << "Already inside test binary, skipping runTests() to prevent recursion.\n";
@@ -78,12 +86,13 @@ int makeTests(std::string repoPath) {
     setenv("INSIDE_TEST_BINARY", "1", 1);
 
     std::string runCmd = "./" + repoPath + "/build/tests > tests.log";
-    res = std::system(runCmd.c_str());
-    if(res != 0) {
-        return 2;
-    }
+    int res = std::system(runCmd.c_str());
 
     setenv("INSIDE_TEST_BINARY", "0", 1);
+
+    if(res != 0) {
+        return 1;
+    }
 
     // Cleans compiled files
     std::string clean_command = "cd " + repoPath + " && make clean -s";
@@ -99,7 +108,7 @@ int makeTests(std::string repoPath) {
  */
 int compile_Makefile(std::string repoPath) {
     // Go to Makefile
-    std::string make_command = "cd " + repoPath + " && make -s";
+    std::string make_command = "cd " + repoPath + " && make > build.log 2>&1";
 
     int res = std::system(make_command.c_str());
     if(res != 0) {
