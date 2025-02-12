@@ -11,6 +11,7 @@
 using json = nlohmann::json;
 
 const int port = 8012;
+extern sqlite3 *db;
 
 void incomingWebhook(const httplib::Request &req, httplib::Response &res);
 void listCommits(const httplib::Request &req, httplib::Response &res);
