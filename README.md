@@ -116,7 +116,7 @@ This has been an interesting exercise, with a lot more intricacy and complexity 
 
 **All members** contributed with documentation and Pull Request checking/merging. 
 
-**Rifat Kazi** - 
+**Rifat Kazi** - Database integration and Testing sequence.
 
 **Teo Nordström** - Initial GitHub structure and Actions, http interactions, README
 
