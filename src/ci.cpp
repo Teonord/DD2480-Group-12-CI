@@ -299,16 +299,16 @@ void sendCommitInfo(std::string publicKey, httplib::Response &res) {
 
         sqlite3_bind_text(stmt, 1, publicKey.c_str(), -1, SQLITE_STATIC);
 
-        sqlite3_step(stmt);
+        rc = sqlite3_step(stmt);
+        if (rc != SQLITE_ROW) {
+            res.status = 404;
+            res.set_content("sql err", "text/plain");
+            return;
+        }
+
         std::string commit = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
         std::string timestamp = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
         std::string buildLog = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
-
-        if (commit == NULL || timestamp == NULL || buildLog == NULL) {
-            res.status = 404;
-            res.set_content("SQL Row not found!", "text/plain");
-            return;
-        }
 
         std::string html;
 

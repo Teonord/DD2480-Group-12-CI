@@ -192,7 +192,6 @@ TEST_CASE("Get Info from Database", "[sendCommitInfo]") {
     sendCommitInfo("1", res);
 
     REQUIRE(res.status == 200);
-    std::cout << res.body;
 }
 
 TEST_CASE("Get non existent Info from Database", "[sendCommitInfo]") {
@@ -203,7 +202,6 @@ TEST_CASE("Get non existent Info from Database", "[sendCommitInfo]") {
     sendCommitInfo("-1", res);
 
     REQUIRE(res.status == 404);
-    std::cout << res.body;
 }
 
 TEST_CASE("Incorrect Public Key", "[sendCommitInfo]") {
@@ -214,6 +212,5 @@ TEST_CASE("Incorrect Public Key", "[sendCommitInfo]") {
     sendCommitInfo("public key :)", res);
 
     REQUIRE(res.status == 404);
-    std::cout << res.body;
 }
 
