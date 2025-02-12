@@ -8,7 +8,7 @@ sqlite3 *db = nullptr;
  *  aka this is the thing that does the stuff 
  *  -------- MAKE BETTER COMMENT AS CODE IS DEVELOPED -----------------
  */
-void testingSequence(std::string ref, std::string cloneUrl, std::string commitSHA, std::string branch) {
+void testingSequence(std::string cloneUrl, std::string commitSHA, std::string branch) {
     // git clone the branch at commit sha
     cloneFromGit(cloneUrl, commitSHA, branch);
 
@@ -97,9 +97,11 @@ void incomingWebhook(const httplib::Request &req, httplib::Response &res) {
             std::string commitSHA = payload["head_commit"]["id"];
             std::string branch = ref.substr(11);
 
+            std::cout << "Test from " << cloneUrl << std::endl;
+
             #ifndef TESTING
                 // do CI on recieved repository
-                std::thread pr(testingSequence, ref, cloneUrl, commitSHA, branch);
+                std::thread pr(testingSequence, cloneUrl, commitSHA, branch);
                 pr.detach();
             #endif
             
@@ -110,14 +112,15 @@ void incomingWebhook(const httplib::Request &req, httplib::Response &res) {
                 res.set_content("pr recv", "text/plain");
                 res.status = 201;
 
-                std::string ref = payload["ref"];
                 std::string cloneUrl = payload["repository"]["clone_url"];
                 std::string commitSHA = payload["pull_request"]["head"]["sha"];
                 std::string branch = payload["pull_request"]["head"]["ref"];
 
+                std::cout << "Test from " << cloneUrl << std::endl;
+
                 #ifndef TESTING
                     // do CI on recieved repository
-                    std::thread pr(testingSequence, ref, cloneUrl, commitSHA, branch);
+                    std::thread pr(testingSequence, cloneUrl, commitSHA, branch);
                     pr.detach();
                 #endif
 
