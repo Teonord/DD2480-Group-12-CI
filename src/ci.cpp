@@ -48,7 +48,10 @@ int testingSequence(std::string cloneUrl, std::string commitSHA, std::string bra
         // make test the cloned folder, return status
         res = makeTests(repoPath);
         print(std::to_string(res));
-        filePath = "tests.log";
+        filePath = repoPath + "/tests.log";
+
+        std::string rm_build_command = "rm " + repoPath + "/build.log";
+        std::system(rm_build_command.c_str());
     } else {
         filePath = repoPath + "/build.log";
     }
@@ -58,6 +61,7 @@ int testingSequence(std::string cloneUrl, std::string commitSHA, std::string bra
     
     std::string buildLog = readFile(filePath);
     insertToDB(commitSHA, buildLog);
+    
     std::string rm_command = "rm " + filePath;
     std::system(rm_command.c_str());
 
@@ -72,33 +76,27 @@ int testingSequence(std::string cloneUrl, std::string commitSHA, std::string bra
  */
 int makeTests(std::string repoPath) {
     // Go to Makefile
-    
-    std::string make_command = "cd " + repoPath + " && make test";
-
-    std::system(make_command.c_str());
 
     if (std::getenv("INSIDE_TEST_BINARY")) {
         std::cerr << "Already inside test binary, skipping runTests() to prevent recursion.\n";
+        std::string file_command = "cd " + repoPath + " && echo Inside of Testing! > tests.log";
+        int res = std::system(file_command.c_str());
         return 0;
     }
 
     // Set the environment variable to indicate we're running tests
     setenv("INSIDE_TEST_BINARY", "1", 1);
-
-    std::string runCmd = "./" + repoPath + "/build/tests > tests.log";
-    int res = std::system(runCmd.c_str());
+    
+    std::string make_command = "cd " + repoPath + " && make test > tests.log > 2>&1";
+    int res = std::system(make_command.c_str());
 
     setenv("INSIDE_TEST_BINARY", "0", 1);
-
-    if(res != 0) {
-        return 1;
-    }
 
     // Cleans compiled files
     std::string clean_command = "cd " + repoPath + " && make clean -s";
     std::system(clean_command.c_str());
 
-    return 0;
+    return res;
 }   
 
 /* compile_Makefile
