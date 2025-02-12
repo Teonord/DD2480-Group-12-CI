@@ -20,12 +20,14 @@ std::string readFile(const std::string& filePath) {
 }
 
 
+
+
 /** testingSequence
  *  Use this sequence to compile, test and return 
  *  aka this is the thing that does the stuff 
  *  -------- MAKE BETTER COMMENT AS CODE IS DEVELOPED -----------------
  */
-void testingSequence(std::string ref, std::string cloneUrl, std::string commitSHA, std::string branch) {
+int testingSequence(std::string cloneUrl, std::string commitSHA, std::string branch) {
     // git clone the branch at commit sha
     cloneFromGit(cloneUrl, commitSHA, branch);
 
@@ -34,14 +36,60 @@ void testingSequence(std::string ref, std::string cloneUrl, std::string commitSH
     int res = compile_Makefile(repoPath);
 
     // make test the cloned folder, return status
+    res = makeTests(repoPath);
 
-    // message git with commit status
-
+    runTests("build/tests");
 
     // p+: save to database
-    
+    std::string filePath = "tests.log";
+    std::string buildLog = readFile(filePath);
+    insertToDB(commitSHA, buildLog);
 
+    return 0;
 }
+
+/** runTests
+ * runs the test binary and saves output to tests.log
+ * 
+ */
+
+int runTests(std::string filePath) {
+    if (std::getenv("INSIDE_TEST_BINARY")) {
+        std::cerr << "Already inside test binary, skipping runTests() to prevent recursion.\n";
+        return 0;
+    }
+
+    // Set the environment variable to indicate we're running tests
+    setenv("INSIDE_TEST_BINARY", "1", 1);
+
+    std::string runCmd = filePath + " > tests.log";
+    int res = std::system(runCmd.c_str());
+
+    return res;
+}
+
+
+
+/* compile_Makefile
+ *
+ * This function takes as input the location where the cloned repository is stored. 
+ * Then it tries to make the cloned repository and returns 1 if unsuccesful. 
+ */
+int makeTests(std::string repoPath) {
+    // Go to Makefile
+    std::string make_command = "cd " + repoPath + " && make build/tests > build.log > 2&1";
+
+    int res = std::system(make_command.c_str());
+    if(res != 0) {
+        return 1;
+    }
+
+    // Cleans compiled files
+    std::string clean_command = "cd " + repoPath + " && make clean -s";
+    std::system(clean_command.c_str());
+
+    return 0;
+}   
 
 /* compile_Makefile
  *
@@ -54,6 +102,8 @@ int compile_Makefile(std::string repoPath) {
 
     int res = std::system(make_command.c_str());
     if(res != 0) {
+        std::cout << "make command " << make_command << std::endl;
+        std::cout << "returning 1" << std::endl;
         return 1;
     }
 
@@ -70,6 +120,11 @@ int compile_Makefile(std::string repoPath) {
  * It also constructs command to go to the specific commit at commitSHA.
  */
 int cloneFromGit(std::string cloneUrl, std::string commitSHA, std::string branch) {
+
+    if (std::filesystem::exists("repos/" + commitSHA)) {
+        std::filesystem::remove_all("repos/" + commitSHA);
+    }
+
     // Clone options
     std::string clone_command = "git clone --branch " + branch + " " + cloneUrl + " repos/" + commitSHA;
 
@@ -209,7 +264,7 @@ bool createTables(){
         return false; // Failed to create table
     }
 
-    std::cout << "Tables created successfully!" << std::endl;
+    //std::cout << "Tables created successfully!" << std::endl;
     return true; 
 }
 
