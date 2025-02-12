@@ -11,6 +11,9 @@
  *  @param argv unused parameter
  */
 int main(int argc, char** argv) {
+
+  connectDB();
+
   httplib::Server server;
 
   server.Post("/ci_webhook", incomingWebhook);

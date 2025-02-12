@@ -243,8 +243,6 @@ bool insertToDB(std::string commitSHA, std::string buildLog){
 void listCommits(const httplib::Request &req, httplib::Response &res) {
     try
     {
-        std::vector<std::string> publicKeys;
-        std::vector<std::string> commits;
 
         #ifndef TESTING
         const char *query = "SELECT id, commit_id FROM ci_table";
@@ -257,24 +255,22 @@ void listCommits(const httplib::Request &req, httplib::Response &res) {
         int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
         if (rc != SQLITE_OK) {
             std::cerr << "SQL error: " << sqlite3_errmsg(db) << std::endl;
+            if (stmt) sqlite3_finalize(stmt);
             res.status = 401;
             res.set_content("sql err", "text/plain");
             return;
         } 
 
-        while (sqlite3_step(stmt) == SQLITE_ROW) {
-            const char* publicKey = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-            const char* commit = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-
-            publicKeys.push_back(publicKey);
-            commits.push_back(commit);
-        }
-
         std::string html;
 
-        for (int i = 0; i < publicKeys.size(); i++) {
-            html += "<a href='/id/" + publicKeys[i] + "'>" + commits[i] + "<br>";
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            std::string publicKey = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+            std::string commit = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+
+            html += "<a href='/id/" + publicKey + "'>" + commit + "<br>";
         }
+
+        sqlite3_finalize(stmt);
 
         res.status = 200;
         res.set_content(html, "text/html");
@@ -286,7 +282,7 @@ void listCommits(const httplib::Request &req, httplib::Response &res) {
     }
 }
 
-/** listCommits
+/** sendCommitInfo
  *  Function to get data from the database and send it back as HTML for
  *  a specific CI execution. First grabs neccessary columns from publicKey row
  *  then sets these ordered in a HTML document and sends back through res.
@@ -308,6 +304,7 @@ void sendCommitInfo(std::string publicKey, httplib::Response &res) {
         int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
         if (rc != SQLITE_OK) {
             std::cerr << "SQL error: " << sqlite3_errmsg(db) << std::endl;
+            if (stmt) sqlite3_finalize(stmt);
             res.status = 401;
             res.set_content("sql err", "text/plain");
             return;
@@ -319,7 +316,8 @@ void sendCommitInfo(std::string publicKey, httplib::Response &res) {
         rc = sqlite3_step(stmt);
         if (rc != SQLITE_ROW) {
             res.status = 404;
-            res.set_content("sql err", "text/plain");
+            res.set_content("sql err 404", "text/plain");
+            sqlite3_finalize(stmt);
             return;
         }
 
@@ -333,6 +331,8 @@ void sendCommitInfo(std::string publicKey, httplib::Response &res) {
         html += "<br>Commit SHA: " + commit;
         html += "<br>Timestamp: " + timestamp;
         html += "<br>Log:<br>" + buildLog;
+
+        sqlite3_finalize(stmt);
 
         res.status = 200;
         res.set_content(html, "text/html");
