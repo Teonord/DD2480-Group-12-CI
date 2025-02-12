@@ -75,22 +75,9 @@ int testingSequence(std::string cloneUrl, std::string commitSHA, std::string bra
  * Then it tries to make the cloned repository and returns 1 if unsuccesful. 
  */
 int makeTests(std::string repoPath) {
-    // Go to Makefile
-
-    if (std::getenv("INSIDE_TEST_BINARY")) {
-        std::cerr << "Already inside test binary, skipping runTests() to prevent recursion.\n";
-        std::string file_command = "cd " + repoPath + " && echo Inside of Testing! > tests.log";
-        int res = std::system(file_command.c_str());
-        return 0;
-    }
-
-    // Set the environment variable to indicate we're running tests
-    setenv("INSIDE_TEST_BINARY", "1", 1);
     
-    std::string make_command = "cd " + repoPath + " && make test > tests.log > 2>&1";
+    std::string make_command = "cd " + repoPath + " && make test > tests.log 2>&1";
     int res = std::system(make_command.c_str());
-
-    setenv("INSIDE_TEST_BINARY", "0", 1);
 
     // Cleans compiled files
     std::string clean_command = "cd " + repoPath + " && make clean -s";

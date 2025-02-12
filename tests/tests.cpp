@@ -204,18 +204,6 @@ TEST_CASE("tests the testing sequence", "[testingSequence]") {
     REQUIRE(res == 0);
 }
 
-//tests reading from a static commit from our repo, should pass
-TEST_CASE("tests reading from a static commit from our repo, should pass", "[testingSequence]") {
-    std::string cloneUrl = "git@github.com:Teonord/DD2480-Group-12-CI.git"; 
-    std::string commitSHA = "80cd803"; 
-    std::string branch = "main";
-    std::string repoPath = "repos/" + commitSHA;
-    int res =  testingSequence(cloneUrl, commitSHA, branch);
-
-    REQUIRE(res == 0);
-}
-
-
 
 TEST_CASE("Make List HTML", "[listCommits]") {
     httplib::Request req;
