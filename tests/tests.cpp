@@ -191,13 +191,27 @@ TEST_CASE("tests reading non existsing file", "[readFile]") {
     REQUIRE(str == "");
 }
 
-//tests reading from an non existing file, should not be able to read
-TEST_CASE("testststs", "[testingSequence]") {
+//testing sequence, should pass
+TEST_CASE("tests the testing sequence", "[testingSequence]") {
 
     std::string cloneUrl = "https://github.com/linusPersonalGit/test_repo.git"; 
     std::string commitSHA = "f6d5f98"; 
     std::string branch = "test_branch";
     std::string repoPath = "repos/" + commitSHA;
-    testingSequence("", cloneUrl, commitSHA, branch);
+    int res = testingSequence(cloneUrl, commitSHA, branch);
+
+    REQUIRE(res == 0);
 }
+
+//tests reading from a static commit from our repo, should pass
+TEST_CASE("teststssds", "[testingSequence]") {
+    std::string cloneUrl = "git@github.com:Teonord/DD2480-Group-12-CI.git"; 
+    std::string commitSHA = "80cd803"; 
+    std::string branch = "main";
+    std::string repoPath = "repos/" + commitSHA;
+    int res =  testingSequence(cloneUrl, commitSHA, branch);
+
+    REQUIRE(res == 0);
+}
+
 
