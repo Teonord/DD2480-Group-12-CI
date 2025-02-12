@@ -19,6 +19,10 @@ std::string readFile(const std::string& filePath) {
     return buffer.str();
 }
 
+void print(std::string st) {
+    std::cout << st << std::endl;
+}
+
 
 
 
@@ -29,43 +33,27 @@ std::string readFile(const std::string& filePath) {
  */
 int testingSequence(std::string cloneUrl, std::string commitSHA, std::string branch) {
     // git clone the branch at commit sha
+    print("Cloning...");
     cloneFromGit(cloneUrl, commitSHA, branch);
 
     // make the cloned folder
+    print("Compiling...");
     std::string repoPath = "repos/" + commitSHA;
     int res = compile_Makefile(repoPath);
 
+    print("Testing....");
     // make test the cloned folder, return status
     res = makeTests(repoPath);
+    print(std::to_string(res));
 
     // p+: save to database
+    print("Inserting...");
     std::string filePath = "tests.log";
     std::string buildLog = readFile(filePath);
     insertToDB(commitSHA, buildLog);
 
     return 0;
 }
-
-/** runTests
- * runs the test binary and saves output to tests.log
- * 
- */
-
-int runTests(std::string filePath) {
-    if (std::getenv("INSIDE_TEST_BINARY")) {
-        std::cerr << "Already inside test binary, skipping runTests() to prevent recursion.\n";
-        return 0;
-    }
-
-    // Set the environment variable to indicate we're running tests
-    setenv("INSIDE_TEST_BINARY", "1", 1);
-
-    std::string runCmd = filePath + " > tests.log";
-    int res = std::system(runCmd.c_str());
-
-    return res;
-}
-
 
 
 /* makeTests
@@ -75,7 +63,8 @@ int runTests(std::string filePath) {
  */
 int makeTests(std::string repoPath) {
     // Go to Makefile
-    std::string make_command = "cd " + repoPath + " && make test > 2&1";
+    
+    std::string make_command = "cd " + repoPath + " && make test";
 
     int res = std::system(make_command.c_str());
     if(res != 0) {
@@ -90,7 +79,7 @@ int makeTests(std::string repoPath) {
     // Set the environment variable to indicate we're running tests
     setenv("INSIDE_TEST_BINARY", "1", 1);
 
-    std::string runCmd = "./" + repoPath + "/build/tests > tests.log > 2&1";
+    std::string runCmd = "./" + repoPath + "/build/tests > tests.log";
     res = std::system(runCmd.c_str());
     if(res != 0) {
         return 2;
