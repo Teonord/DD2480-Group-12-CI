@@ -20,6 +20,7 @@ void testingSequence(std::string ref, std::string cloneUrl, std::string commitSH
 int cloneFromGit(std::string cloneUrl, std::string commitSHA, std::string branch);
 int compile_Makefile(std::string repoPath);
 bool connectDB();
+bool createTables(); 
 bool insertToDB(std::string commitSHA, std::string buildLog);
 
 #endif

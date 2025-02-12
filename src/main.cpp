@@ -12,7 +12,8 @@
  */
 int main(int argc, char** argv) {
 
-  connectDB();
+  if(!connectDB()) return 1;
+  if(!createTables()) return 1;
 
   httplib::Server server;
 
