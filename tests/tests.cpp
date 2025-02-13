@@ -12,7 +12,7 @@ TEST_CASE("push events handled correctly", "[incomingWebhook]") {
     json payload = {
         {"ref", "refs/heads/test1"},
         {"action", "opened"},
-        {"repository", {{"clone_url", "https://test.test"}}},
+        {"repository", {{"clone_url", "https://test.test"}, {"statuses_url", "status{sha}"}}},
         {"head_commit", {{"id", "testshaa"}}}
     };
 
@@ -32,7 +32,7 @@ TEST_CASE("usable pull request events handled correctly", "[incomingWebhook]") {
     json payload = {
         {"ref", "refs/heads/test2"},
         {"action", "opened"},
-        {"repository", {{"clone_url", "https://test.test"}}},
+        {"repository", {{"clone_url", "https://test.test"}, {"statuses_url", "status{sha}"}}},
         {"pull_request", {
             {"head", {
                 {"sha", "testsha"},
@@ -57,7 +57,7 @@ TEST_CASE("trash pull request events handled correctly", "[incomingWebhook]") {
     json payload = {
         {"ref", "refs/heads/test3"},
         {"action", "reviewed"},
-        {"repository", {{"clone_url", "https://test.test"}}},
+        {"repository", {{"clone_url", "https://test.test"}, {"statuses_url", "status{sha}"}}},
         {"pull_request", {
             {"head", {
                 {"sha", "testsha"},
