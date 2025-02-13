@@ -252,6 +252,8 @@ TEST_CASE("Get non existent Info from Database", "[sendCommitInfo]") {
     sendCommitInfo("-1", res);
 
     REQUIRE(res.status == 404);
+
+    REQUIRE(true == false);
 }
 
 TEST_CASE("Incorrect Public Key", "[sendCommitInfo]") {
