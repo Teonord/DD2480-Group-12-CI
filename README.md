@@ -1,7 +1,7 @@
 # CI: A simple C++ Continuous Integration server for GitHub
 ### Group 12's submission for Assignment 2 in DD2480 Software Engineering Fundamentals
 
-C++ program that compiles and tests GitHub repositories, and emails user on completion. 
+C++ program that compiles and tests GitHub repositories, updates the status of the commit on completion. 
 
 This program can be linked as a webhook to GitHub repositories, after which it will run on any push and pull request. The code will run the Makefile to both compile and test the program. The server will then send a mail to the tester with information about whether the program passed or not. 
 
@@ -40,13 +40,19 @@ Go to the project directory
 Install Dependencies
 
 ```bash
-  sudo apt install make g++ libsqlite3-dev
+  sudo apt install make g++ libsqlite3-dev libssl-dev
 ```
 
 Compile the files
 
 ```bash
   make 
+```
+
+Export your GitHub API Authentication key for Commit Status Changes (needs permissions for Read and Write access to commit statuses)
+
+```bash
+  export GITHUB_API_TOKEN=<token>
 ```
 
 Run the code
@@ -102,13 +108,14 @@ To compile the programs during runtime, we have opted to use the std::system() f
 To unit test this, we have three fake testing repositories in the testing folder, one with code that will compile well, one with code that will not compile, and one without a Makefile. Unittests are run with Catch2 to make sure that the expected behaviour is had when running `make` in all three of these folders. 
 
 ## The Testing
-To test a GitHub repo, we have set up a HTTP server through httplib which listens to Post messages on the `/ci_webhook` link. The request information sent by GitHub is then used to extrapolate all important information such as Commit ID, branch name and Cloning URL. The repo is then cloned using `std::system` calls, which downloads the requested testing repo. Using the methods explained above, the project is then compiled and tested. After compilation, the results are notified to the email, as explained below. The results and other important information is also added to the Database for future storage.
+To test a GitHub repo, we have set up a HTTP server through httplib which listens to Post messages on the `/ci_webhook` link. The request information sent by GitHub is then used to extrapolate all important information such as Commit ID, branch name and Cloning URL. The repo is then cloned using `std::system` calls, which downloads the requested testing repo. Using the methods explained above, the project is then compiled and tested. After compilation and testing, the commit status is updated, as explained below. The results and other important information is also added to the Database for future storage.
 
 To unit test our implementation, we have set up separate testing repos that run on the same CI server. There are several different ones, one that has a functional compilation and passes testing, one that doesn't complete testing, one that doesn't compile and one that doesn't have a Makefile. Through this we can unit test the functionality of the CI server. 
 
-## Email Notifications
-This is how the email system was implemented
-This is how the email system was unit-tested
+## Commit Status
+To update the commit status, we needed to post a HTTPS message to the GitHub API. Luckily, the webhook included everything needed for us to get the URL and therefore the implementation could be done without too much hassle. In order to send the notification, we create a HTTPlib SSLClient for the github api, to which we make a payload with the status and a header with a GitHub authorization token. This is then posted to GitHub and the response is awaited, with the results being returned back. 
+
+Unit testing of this was a bit difficult, but we ended up using a separate repo with a set commit as our testing grounds. We use the function notifyCommitStatus to change the commit status and await the response from github to see whether it has passed or not.
 
 ## Statement of Contributions
 
@@ -118,11 +125,11 @@ This has been an interesting exercise, with a lot more intricacy and complexity 
 
 **Rifat Kazi** - Database integration and Testing sequence.
 
-**Teo Nordström** - Initial GitHub structure and Actions, http interactions, README
+**Teo Nordström** - Http interactions, README, GitHub status
 
 **Linus Svensson** - Repository cloning and compiling with corresponding tests
 
-**Syam Kumar Vemana** -
+**Syam Kumar Vemana** - Testing and evaluation of possible tools
 
 ## Licenses
 
