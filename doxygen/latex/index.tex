@@ -1,0 +1,163 @@
+\chapter{CI\+: A simple C++ Continuous Integration server for Git\+Hub}
+\hypertarget{index}{}\label{index}\index{CI: A simple C++ Continuous Integration server for GitHub@{CI: A simple C++ Continuous Integration server for GitHub}}
+\label{index_md_README}%
+\Hypertarget{index_md_README}%
+\hypertarget{index_autotoc_md1}{}\doxysubsection{\texorpdfstring{Group 12\textquotesingle{}s submission for Assignment 2 in DD2480 Software Engineering Fundamentals}{Group 12's submission for Assignment 2 in DD2480 Software Engineering Fundamentals}}\label{index_autotoc_md1}
+C++ program that compiles and tests Git\+Hub repositories, updates the status of the commit on completion.
+
+This program can be linked as a webhook to Git\+Hub repositories, after which it will run on any push and pull request. The code will run the Makefile to both compile and test the program. The server will then send a mail to the tester with information about whether the program passed or not.
+
+The program also allows the user to go to {\ttfamily /list} to get a list of all previous runs, and these runs can be clicked to get further information.
+
+The program will most likely be running on \href{basically-sure-piranha.ngrok-free.app}{\texttt{ This Link}} for the presentation.\hypertarget{index_autotoc_md2}{}\doxysection{\texorpdfstring{Structure}{Structure}}\label{index_autotoc_md2}
+
+\begin{DoxyItemize}
+\item {\bfseries{external}}
+\begin{DoxyItemize}
+\item Contains external code developed by other developers, namely the header libraries used.
+\end{DoxyItemize}
+\item {\bfseries{include}}
+\begin{DoxyItemize}
+\item Contains header files for our own developed code and program.
+\end{DoxyItemize}
+\item {\bfseries{src}}
+\begin{DoxyItemize}
+\item Contains the developed code, split into two files, one for atomic functions and one for the main function.
+\end{DoxyItemize}
+\item {\bfseries{tests}}
+\begin{DoxyItemize}
+\item Contains the unit tests for all developed functions in the code. Uses the Catch2 framework from "{}external/"{}
+\end{DoxyItemize}
+\item {\bfseries{Makefile}}
+\begin{DoxyItemize}
+\item Contains functions to easily compile and test the program, further usage explained below.
+\end{DoxyItemize}
+\end{DoxyItemize}\hypertarget{index_autotoc_md3}{}\doxysection{\texorpdfstring{Running Code}{Running Code}}\label{index_autotoc_md3}
+This assumes you are running {\bfseries{Ubuntu}} for your local computer.
+
+Clone the project
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{git\ clone\ git@github.com:Teonord/DD2480-\/Group-\/12-\/CI.git}
+
+\end{DoxyCode}
+
+
+Go to the project directory
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{cd\ DD2480-\/Group-\/12-\/CI}
+
+\end{DoxyCode}
+
+
+Install Dependencies
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{sudo\ apt\ install\ make\ g++\ libsqlite3-\/dev\ libssl-\/dev}
+
+\end{DoxyCode}
+
+
+Compile the files
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{make\ }
+
+\end{DoxyCode}
+
+
+Export your Git\+Hub API Authentication key for Commit Status Changes (needs permissions for Read and Write access to commit statuses)
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{export\ GITHUB\_API\_TOKEN=<token>}
+
+\end{DoxyCode}
+
+
+Run the code
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{./build/ci}
+
+\end{DoxyCode}
+\hypertarget{index_autotoc_md4}{}\doxysection{\texorpdfstring{Running Tests}{Running Tests}}\label{index_autotoc_md4}
+Compile and run the tests
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{make\ test}
+
+\end{DoxyCode}
+\hypertarget{index_autotoc_md5}{}\doxysection{\texorpdfstring{Using Web Connections}{Using Web Connections}}\label{index_autotoc_md5}
+The code automatically binds to Port 8012. To access this service, ngrok is recommended.
+
+To run ngrok for this program, open another command prompt and do
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{ngrok\ http\ 8012\ }
+
+\end{DoxyCode}
+ If you have a URL from ngrok, you can append it here. For example
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{ngrok\ http\ -\/-\/url\ basically-\/sure-\/piranha.ngrok-\/free.app\ 8012\ }
+
+\end{DoxyCode}
+
+
+Alternatively, you can open port 8012 in your router, but this will not be described here.
+
+{\ttfamily \texorpdfstring{$<$}{<}link\texorpdfstring{$>$}{>}} below will be the URL provided by ngrok (or {\ttfamily \texorpdfstring{$<$}{<}ip\texorpdfstring{$>$}{>}\+:8012} if port forwarding)
+
+To add as a CI server, go to your Git\+Hub Repo \texorpdfstring{$>$}{>} Settings \texorpdfstring{$>$}{>} Webhooks \texorpdfstring{$>$}{>} Add Webhook. Here, add {\ttfamily \texorpdfstring{$<$}{<}link\texorpdfstring{$>$}{>}/ci\+\_\+webhook} as your Payload URL. Set Content type to {\ttfamily application/json}. Disable SSL verification. For events, select "{}\+Let me select individual events"{} and check {\ttfamily Pushes} and {\ttfamily Pull Requests}. Now the CI server should be good to go!
+
+To get the list of all previous builds done, go to the following link\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{<link>/list}
+
+\end{DoxyCode}
+\hypertarget{index_autotoc_md6}{}\doxysection{\texorpdfstring{Clean build folder}{Clean build folder}}\label{index_autotoc_md6}
+Clean the compiled code build
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{make\ clean\ }
+
+\end{DoxyCode}
+\hypertarget{index_autotoc_md7}{}\doxysection{\texorpdfstring{The Compilation}{The Compilation}}\label{index_autotoc_md7}
+To compile the programs during runtime, we have opted to use the std\+::system() function. This function will call {\ttfamily make -\/s} in the folder of the downloaded repository, and {\ttfamily make test -\/s} is used for testing. The system call results in a 0 if everything passed smoothly, while if there are any errors a non-\/zero result is returned. Logs are saved into a Sqlite3 database.
+
+To unit test this, we have three fake testing repositories in the testing folder, one with code that will compile well, one with code that will not compile, and one without a Makefile. Unittests are run with Catch2 to make sure that the expected behaviour is had when running {\ttfamily make} in all three of these folders.\hypertarget{index_autotoc_md8}{}\doxysection{\texorpdfstring{The Testing}{The Testing}}\label{index_autotoc_md8}
+To test a Git\+Hub repo, we have set up a HTTP server through httplib which listens to Post messages on the {\ttfamily /ci\+\_\+webhook} link. The request information sent by Git\+Hub is then used to extrapolate all important information such as Commit ID, branch name and Cloning URL. The repo is then cloned using {\ttfamily std\+::system} calls, which downloads the requested testing repo. Using the methods explained above, the project is then compiled and tested. After compilation and testing, the commit status is updated, as explained below. The results and other important information is also added to the Database for future storage.
+
+To unit test our implementation, we have set up separate testing repos that run on the same CI server. There are several different ones, one that has a functional compilation and passes testing, one that doesn\textquotesingle{}t complete testing, one that doesn\textquotesingle{}t compile and one that doesn\textquotesingle{}t have a Makefile. Through this we can unit test the functionality of the CI server.\hypertarget{index_autotoc_md9}{}\doxysection{\texorpdfstring{Commit Status}{Commit Status}}\label{index_autotoc_md9}
+To update the commit status, we needed to post a HTTPS message to the Git\+Hub API. Luckily, the webhook included everything needed for us to get the URL and therefore the implementation could be done without too much hassle. In order to send the notification, we create a HTTPlib SSLClient for the github api, to which we make a payload with the status and a header with a Git\+Hub authorization token. This is then posted to Git\+Hub and the response is awaited, with the results being returned back.
+
+Unit testing of this was a bit difficult, but we ended up using a separate repo with a set commit as our testing grounds. We use the function notify\+Commit\+Status to change the commit status and await the response from github to see whether it has passed or not.\hypertarget{index_autotoc_md10}{}\doxysection{\texorpdfstring{Statement of Contributions}{Statement of Contributions}}\label{index_autotoc_md10}
+This has been an interesting exercise, with a lot more intricacy and complexity than the first Assignment. But, even with that, we made it work, and even has the properties for P+ -\/ this is something to be proud of!
+
+{\bfseries{All members}} contributed with documentation and Pull Request checking/merging.
+
+{\bfseries{Rifat Kazi}} -\/ Database integration and Testing sequence.
+
+{\bfseries{Teo Nordström}} -\/ Http interactions, README, Git\+Hub status
+
+{\bfseries{Linus Svensson}} -\/ Repository cloning and compiling with corresponding tests
+
+{\bfseries{Syam Kumar Vemana}} -\/ Testing and evaluation of possible tools\hypertarget{index_autotoc_md11}{}\doxysection{\texorpdfstring{Licenses}{Licenses}}\label{index_autotoc_md11}
+This project includes Catch2, which is licensed under the Boost Software License 1.\+0. The full license text can be found in {\ttfamily external/\+Catch2\+\_\+\+LICENSE.\+txt}.
+
+This project includes httplib, which is licensed under the MIT License. The full license text can be found in {\ttfamily external/httplib\+\_\+\+LICENSE.\+txt}.
+
+This project includes nlohmann json, which is licensed under the MIT License. The full license text can be found in {\ttfamily external/json\+\_\+\+LICENSE.\+txt}.
+
+The code developed in this project is licensed under the MIT License. The full license text can be found in {\ttfamily LICENSE}. 
