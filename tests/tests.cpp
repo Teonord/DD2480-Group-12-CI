@@ -3,7 +3,7 @@
 #include "../external/catch.hpp"
 #include "../include/ci.hpp"
 
-
+lib = 5
 
 TEST_CASE("push events handled correctly", "[incomingWebhook]") {
     httplib::Request req;
