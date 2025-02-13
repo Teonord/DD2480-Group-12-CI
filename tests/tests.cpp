@@ -12,7 +12,7 @@ TEST_CASE("push events handled correctly", "[incomingWebhook]") {
     json payload = {
         {"ref", "refs/heads/test1"},
         {"action", "opened"},
-        {"repository", {{"clone_url", "https://test.test"}}},
+        {"repository", {{"clone_url", "https://test.test"}, {"statuses_url", "status{sha}"}}},
         {"head_commit", {{"id", "testshaa"}}}
     };
 
@@ -32,7 +32,7 @@ TEST_CASE("usable pull request events handled correctly", "[incomingWebhook]") {
     json payload = {
         {"ref", "refs/heads/test2"},
         {"action", "opened"},
-        {"repository", {{"clone_url", "https://test.test"}}},
+        {"repository", {{"clone_url", "https://test.test"}, {"statuses_url", "status{sha}"}}},
         {"pull_request", {
             {"head", {
                 {"sha", "testsha"},
@@ -57,7 +57,7 @@ TEST_CASE("trash pull request events handled correctly", "[incomingWebhook]") {
     json payload = {
         {"ref", "refs/heads/test3"},
         {"action", "reviewed"},
-        {"repository", {{"clone_url", "https://test.test"}}},
+        {"repository", {{"clone_url", "https://test.test"}, {"statuses_url", "status{sha}"}}},
         {"pull_request", {
             {"head", {
                 {"sha", "testsha"},
@@ -100,6 +100,28 @@ TEST_CASE("error handled with 400", "[incomingWebhook]") {
     REQUIRE(res.body == "err");
     REQUIRE(res.status == 400);
 }
+
+/** Cannot be run through github actions, commented out.
+TEST_CASE("Updates git status with success", "[notifyCommitStatus]") {
+    REQUIRE(notifyCommitStatus("https://api.github.com/repos/Teonord/CI-Test-Repos/statuses/53d2064785e5dfd2d1d1a500f25a0ad828e1c70d", "success") == 0);
+}
+
+TEST_CASE("Updates git status with failure", "[notifyCommitStatus]") {
+    REQUIRE(notifyCommitStatus("https://api.github.com/repos/Teonord/CI-Test-Repos/statuses/53d2064785e5dfd2d1d1a500f25a0ad828e1c70d", "failure") == 0);
+}
+
+TEST_CASE("Updates git status with error", "[notifyCommitStatus]") {
+    REQUIRE(notifyCommitStatus("https://api.github.com/repos/Teonord/CI-Test-Repos/statuses/53d2064785e5dfd2d1d1a500f25a0ad828e1c70d", "error") == 0);
+}
+
+TEST_CASE("Updates git status with garbage", "[notifyCommitStatus]") {
+    REQUIRE(notifyCommitStatus("https://api.github.com/repos/Teonord/CI-Test-Repos/statuses/53d2064785e5dfd2d1d1a500f25a0ad828e1c70d", "garbageasdasd vcvsdfe") != 0);
+}
+
+TEST_CASE("Updates faulty git status link", "[notifyCommitStatus]") {
+    REQUIRE(notifyCommitStatus("https://api.github.com/repos/Teonord/CI-Test-Repos/statuses/53d206478d1a500f25a0ad828e1c70d", "success") != 0);
+}
+*/
 
 // Tests cloning
 TEST_CASE("Tests the repo cloning and correct commitSHA", "[cloneFromGit]") {
@@ -199,7 +221,7 @@ TEST_CASE("tests the testing sequence", "[testingSequence]") {
     std::string commitSHA = "f6d5f98"; 
     std::string branch = "test_branch";
     std::string repoPath = "repos/" + commitSHA;
-    int res = testingSequence(cloneUrl, commitSHA, branch);
+    int res = testingSequence(cloneUrl, commitSHA, branch, "");
 
     REQUIRE(res == 0);
 }
