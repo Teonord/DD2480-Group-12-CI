@@ -49,6 +49,12 @@ Compile the files
   make 
 ```
 
+Export your GitHub API Authentication key for Commit Status Changes (needs permissions for Read and Write access to commit statuses)
+
+```bash
+  export GITHUB_API_TOKEN=<token>
+```
+
 Run the code
 
 ```bash
