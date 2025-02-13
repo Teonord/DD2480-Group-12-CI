@@ -96,7 +96,7 @@ int notifyCommitStatus(std::string apiUrl, std::string status) {
 
     if (res && res->status == 201) {
         std::cout << "GitHub status updated successfully!\n";
-        return 201;
+        return 0;
     } else {
         if (res) {
             std::cerr << "Failed with code " << res->status << "\n";

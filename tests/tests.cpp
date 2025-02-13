@@ -101,6 +101,28 @@ TEST_CASE("error handled with 400", "[incomingWebhook]") {
     REQUIRE(res.status == 400);
 }
 
+/** Cannot be run through github actions, commented out.
+TEST_CASE("Updates git status with success", "[notifyCommitStatus]") {
+    REQUIRE(notifyCommitStatus("https://api.github.com/repos/Teonord/CI-Test-Repos/statuses/53d2064785e5dfd2d1d1a500f25a0ad828e1c70d", "success") == 0);
+}
+
+TEST_CASE("Updates git status with failure", "[notifyCommitStatus]") {
+    REQUIRE(notifyCommitStatus("https://api.github.com/repos/Teonord/CI-Test-Repos/statuses/53d2064785e5dfd2d1d1a500f25a0ad828e1c70d", "failure") == 0);
+}
+
+TEST_CASE("Updates git status with error", "[notifyCommitStatus]") {
+    REQUIRE(notifyCommitStatus("https://api.github.com/repos/Teonord/CI-Test-Repos/statuses/53d2064785e5dfd2d1d1a500f25a0ad828e1c70d", "error") == 0);
+}
+
+TEST_CASE("Updates git status with garbage", "[notifyCommitStatus]") {
+    REQUIRE(notifyCommitStatus("https://api.github.com/repos/Teonord/CI-Test-Repos/statuses/53d2064785e5dfd2d1d1a500f25a0ad828e1c70d", "garbageasdasd vcvsdfe") != 0);
+}
+
+TEST_CASE("Updates faulty git status link", "[notifyCommitStatus]") {
+    REQUIRE(notifyCommitStatus("https://api.github.com/repos/Teonord/CI-Test-Repos/statuses/53d206478d1a500f25a0ad828e1c70d", "success") != 0);
+}
+*/
+
 // Tests cloning
 TEST_CASE("Tests the repo cloning and correct commitSHA", "[cloneFromGit]") {
     std::string cloneUrl = "https://github.com/linusPersonalGit/test_repo.git"; 
