@@ -19,7 +19,7 @@
 #include <sqlite3.h>
 #include <filesystem>
 
-sing json = nlohmann::json;
+using json = nlohmann::json;
 
 /** @brief Port number for the server. */
 const int port = 8012;
