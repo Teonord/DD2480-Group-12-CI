@@ -1,0 +1,51 @@
+\doxysection{ci.\+hpp}
+\hypertarget{ci_8hpp_source}{}\label{ci_8hpp_source}\index{include/ci.hpp@{include/ci.hpp}}
+\mbox{\hyperlink{ci_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#ifndef\ CI\_H}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#define\ CI\_H}}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#define\ CPPHTTPLIB\_OPENSSL\_SUPPORT}}
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#include\ <iostream>}}
+\DoxyCodeLine{00015\ \textcolor{preprocessor}{\#include\ <thread>}}
+\DoxyCodeLine{00016\ \textcolor{preprocessor}{\#include\ <array>}}
+\DoxyCodeLine{00017\ \textcolor{preprocessor}{\#include\ "{}../external/httplib.h"{}}}
+\DoxyCodeLine{00018\ \textcolor{preprocessor}{\#include\ "{}../external/json.hpp"{}}}
+\DoxyCodeLine{00019\ \textcolor{preprocessor}{\#include\ <sqlite3.h>}}
+\DoxyCodeLine{00020\ \textcolor{preprocessor}{\#include\ <filesystem>}}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00022\ \textcolor{keyword}{using\ }json\ =\ nlohmann::json;}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00025\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{ci_8hpp_a0eb069d5f53d3e9269b0f321cfbcf108}{port}}\ =\ 8012;}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00028\ \textcolor{keyword}{extern}\ sqlite3\ *\mbox{\hyperlink{ci_8hpp_ad6e663497d2c934364b3bcf07496b30b}{db}};}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00035\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{ci_8hpp_a3acee2bd75c01448c833bbc0409fb870}{incomingWebhook}}(\textcolor{keyword}{const}\ httplib::Request\ \&req,\ httplib::Response\ \&res);}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00042\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{ci_8hpp_a7f290cad8c097bbff8c1979114622139}{listCommits}}(\textcolor{keyword}{const}\ httplib::Request\ \&req,\ httplib::Response\ \&res);}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00049\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{ci_8hpp_a5ea4db9b8d3d543773cc14affc0270e8}{sendCommitInfo}}(std::string\ publicKey,\ httplib::Response\ \&res);}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00059\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{ci_8hpp_aa34f4f33c94809c4d3b7b4299a480bc0}{testingSequence}}(std::string\ cloneUrl,\ std::string\ commitSHA,\ std::string\ branch,\ std::string\ statusUrl);}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00068\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{ci_8hpp_a62602526cb4c6128437fbad1f192d70d}{cloneFromGit}}(std::string\ cloneUrl,\ std::string\ commitSHA,\ std::string\ branch);}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00075\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{ci_8hpp_af9b302e10ad0daa6bb3a9134fd72bc7d}{compile\_Makefile}}(std::string\ repoPath);}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00081\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{ci_8hpp_a77c387059053f0d3704ad44c4c96163b}{connectDB}}();}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00087\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{ci_8hpp_adb3d71a17491d64be7bfe71ce597b80f}{createTables}}();}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00095\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{ci_8hpp_a6c915a5c46a47fe32de76d115707bc16}{insertToDB}}(std::string\ commitSHA,\ std::string\ buildLog);}
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00102\ std::string\ \mbox{\hyperlink{ci_8hpp_adece9258103cab9ed2cd9c8c24a8dc04}{readFile}}(\textcolor{keyword}{const}\ std::string\&\ filePath);}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00109\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{ci_8hpp_a487f1abb996a25726689c790b552097d}{makeTests}}(std::string\ repoPath);}
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00117\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{ci_8hpp_afb92a115cb0b31e704c925bfaf426ff3}{notifyCommitStatus}}(std::string\ commitSHA,\ std::string\ status);}
+\DoxyCodeLine{00118\ }
+\DoxyCodeLine{00119\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ CI\_H}}
+
+\end{DoxyCode}
