@@ -19,17 +19,23 @@ std::string readFile(const std::string& filePath) {
     return buffer.str();
 }
 
+/** print
+ * Simple function to print a message to stdout
+ */
 void print(std::string st) {
     std::cout << st << std::endl;
 }
 
 /** testingSequence
- *  Use this sequence to compile, test and return 
- *  aka this is the thing that does the stuff 
- *  -------- MAKE BETTER COMMENT AS CODE IS DEVELOPED -----------------
+ *  Use this sequence to do the continous integration
+ * First notifies github about the pending test
+ * then clones the repository and compiles it,
+ * if successfully compiled test it. Return status of 
+ * compilation and testing to github and add into a 
+ * repository
  */
 int testingSequence(std::string cloneUrl, std::string commitSHA, std::string branch, std::string statusUrl) {
-
+    
     notifyCommitStatus(statusUrl, "pending");
 
     // git clone the branch at commit sha
@@ -72,7 +78,13 @@ int testingSequence(std::string cloneUrl, std::string commitSHA, std::string bra
     return 0;
 }
 
+/** notifyCommitStatus
+ * notify Github with the status of the commit
+ */
 int notifyCommitStatus(std::string apiUrl, std::string status) {
+
+    if(apiUrl == "") return -1;
+
     httplib::SSLClient client("api.github.com");
     std::string apiPath = apiUrl.substr(22);
 
@@ -195,6 +207,8 @@ void incomingWebhook(const httplib::Request &req, httplib::Response &res) {
             std::string commitSHA = payload["head_commit"]["id"];
             std::string branch = ref.substr(11);
             std::string statusUrl = payload["repository"]["statuses_url"];
+            size_t pos = statusUrl.find("{sha}");
+            statusUrl.replace(pos, 5, commitSHA);
 
             std::cout << "Test from " << cloneUrl << std::endl;
 
@@ -215,6 +229,8 @@ void incomingWebhook(const httplib::Request &req, httplib::Response &res) {
                 std::string commitSHA = payload["pull_request"]["head"]["sha"];
                 std::string branch = payload["pull_request"]["head"]["ref"];
                 std::string statusUrl = payload["repository"]["statuses_url"];
+                size_t pos = statusUrl.find("{sha}");
+                statusUrl.replace(pos, 5, commitSHA);
 
                 std::cout << "Test from " << cloneUrl << std::endl;
 
@@ -257,6 +273,10 @@ bool connectDB(){
     return true;
 }
 
+/**createTables
+ * Create the neccessary tables for the program to function
+ * the ci_tests table is for testing
+ */
 bool createTables(){
     const char* query = R"(
         CREATE TABLE IF NOT EXISTS ci_table (

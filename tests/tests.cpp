@@ -199,7 +199,7 @@ TEST_CASE("tests the testing sequence", "[testingSequence]") {
     std::string commitSHA = "f6d5f98"; 
     std::string branch = "test_branch";
     std::string repoPath = "repos/" + commitSHA;
-    int res = testingSequence(cloneUrl, commitSHA, branch);
+    int res = testingSequence(cloneUrl, commitSHA, branch, "");
 
     REQUIRE(res == 0);
 }
