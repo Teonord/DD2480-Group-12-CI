@@ -1,0 +1,308 @@
+\doxysection{include/ci.hpp File Reference}
+\hypertarget{ci_8hpp}{}\label{ci_8hpp}\index{include/ci.hpp@{include/ci.hpp}}
+
+
+Header file for Continuous Integration system functions.  
+
+
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$thread$>$}\newline
+{\ttfamily \#include $<$array$>$}\newline
+{\ttfamily \#include "{}../external/httplib.\+h"{}}\newline
+{\ttfamily \#include "{}../external/json.\+hpp"{}}\newline
+{\ttfamily \#include $<$sqlite3.\+h$>$}\newline
+{\ttfamily \#include $<$filesystem$>$}\newline
+Include dependency graph for ci.\+hpp\+:
+% FIG 0
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{ci_8hpp_a3acee2bd75c01448c833bbc0409fb870}{incoming\+Webhook}} (const httplib\+::\+Request \&req, httplib\+::\+Response \&res)
+\begin{DoxyCompactList}\small\item\em Handles incoming webhooks. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{ci_8hpp_a7f290cad8c097bbff8c1979114622139}{list\+Commits}} (const httplib\+::\+Request \&req, httplib\+::\+Response \&res)
+\begin{DoxyCompactList}\small\item\em Lists the commits stored in the system. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{ci_8hpp_a5ea4db9b8d3d543773cc14affc0270e8}{send\+Commit\+Info}} (std\+::string public\+Key, httplib\+::\+Response \&res)
+\begin{DoxyCompactList}\small\item\em Sends commit information. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{ci_8hpp_aa34f4f33c94809c4d3b7b4299a480bc0}{testing\+Sequence}} (std\+::string clone\+Url, std\+::string commit\+SHA, std\+::string branch, std\+::string status\+Url)
+\begin{DoxyCompactList}\small\item\em Runs the testing sequence for a given repository. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{ci_8hpp_a62602526cb4c6128437fbad1f192d70d}{clone\+From\+Git}} (std\+::string clone\+Url, std\+::string commit\+SHA, std\+::string branch)
+\begin{DoxyCompactList}\small\item\em Clones a repository from Git. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{ci_8hpp_af9b302e10ad0daa6bb3a9134fd72bc7d}{compile\+\_\+\+Makefile}} (std\+::string repo\+Path)
+\begin{DoxyCompactList}\small\item\em Compiles the repository using a Makefile. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{ci_8hpp_a77c387059053f0d3704ad44c4c96163b}{connect\+DB}} ()
+\begin{DoxyCompactList}\small\item\em Establishes a connection to the database. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{ci_8hpp_adb3d71a17491d64be7bfe71ce597b80f}{create\+Tables}} ()
+\begin{DoxyCompactList}\small\item\em Creates necessary tables in the database. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{ci_8hpp_a6c915a5c46a47fe32de76d115707bc16}{insert\+To\+DB}} (std\+::string commit\+SHA, std\+::string build\+Log)
+\begin{DoxyCompactList}\small\item\em Inserts commit data into the database. \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{ci_8hpp_adece9258103cab9ed2cd9c8c24a8dc04}{read\+File}} (const std\+::string \&file\+Path)
+\begin{DoxyCompactList}\small\item\em Reads a file and returns its contents as a string. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{ci_8hpp_a487f1abb996a25726689c790b552097d}{make\+Tests}} (std\+::string repo\+Path)
+\begin{DoxyCompactList}\small\item\em Runs tests on the repository. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{ci_8hpp_afb92a115cb0b31e704c925bfaf426ff3}{notify\+Commit\+Status}} (std\+::string commit\+SHA, std\+::string status)
+\begin{DoxyCompactList}\small\item\em Notifies the commit status to an external service. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{ci_8hpp_a70dfe18076dc2062176b98199ad43de6}\label{ci_8hpp_a70dfe18076dc2062176b98199ad43de6} 
+sing {\bfseries json} = nlohmann\+::json
+\item 
+\Hypertarget{ci_8hpp_a0eb069d5f53d3e9269b0f321cfbcf108}\label{ci_8hpp_a0eb069d5f53d3e9269b0f321cfbcf108} 
+const int {\bfseries port} = 8012
+\begin{DoxyCompactList}\small\item\em Port number for the server. \end{DoxyCompactList}\item 
+\Hypertarget{ci_8hpp_ad6e663497d2c934364b3bcf07496b30b}\label{ci_8hpp_ad6e663497d2c934364b3bcf07496b30b} 
+sqlite3 \texorpdfstring{$\ast$}{*} {\bfseries db}
+\begin{DoxyCompactList}\small\item\em Pointer to the SQLite database. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Header file for Continuous Integration system functions. 
+
+This file contains function declarations for handling webhooks, managing repositories, compiling and testing code, and interacting with a database. 
+
+\doxysubsection{Function Documentation}
+\Hypertarget{ci_8hpp_a62602526cb4c6128437fbad1f192d70d}\label{ci_8hpp_a62602526cb4c6128437fbad1f192d70d} 
+\index{ci.hpp@{ci.hpp}!cloneFromGit@{cloneFromGit}}
+\index{cloneFromGit@{cloneFromGit}!ci.hpp@{ci.hpp}}
+\doxysubsubsection{\texorpdfstring{cloneFromGit()}{cloneFromGit()}}
+{\footnotesize\ttfamily int clone\+From\+Git (\begin{DoxyParamCaption}\item[{std\+::string}]{clone\+Url,  }\item[{std\+::string}]{commit\+SHA,  }\item[{std\+::string}]{branch }\end{DoxyParamCaption})}
+
+
+
+Clones a repository from Git. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em clone\+Url} & The repository clone URL. \\
+\hline
+{\em commit\+SHA} & The commit SHA to checkout. \\
+\hline
+{\em branch} & The branch to be cloned. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Integer representing success (0) or failure. 
+\end{DoxyReturn}
+\Hypertarget{ci_8hpp_af9b302e10ad0daa6bb3a9134fd72bc7d}\label{ci_8hpp_af9b302e10ad0daa6bb3a9134fd72bc7d} 
+\index{ci.hpp@{ci.hpp}!compile\_Makefile@{compile\_Makefile}}
+\index{compile\_Makefile@{compile\_Makefile}!ci.hpp@{ci.hpp}}
+\doxysubsubsection{\texorpdfstring{compile\_Makefile()}{compile\_Makefile()}}
+{\footnotesize\ttfamily int compile\+\_\+\+Makefile (\begin{DoxyParamCaption}\item[{std\+::string}]{repo\+Path }\end{DoxyParamCaption})}
+
+
+
+Compiles the repository using a Makefile. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em repo\+Path} & The path to the repository. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Integer representing success (0) or failure. 
+\end{DoxyReturn}
+\Hypertarget{ci_8hpp_a77c387059053f0d3704ad44c4c96163b}\label{ci_8hpp_a77c387059053f0d3704ad44c4c96163b} 
+\index{ci.hpp@{ci.hpp}!connectDB@{connectDB}}
+\index{connectDB@{connectDB}!ci.hpp@{ci.hpp}}
+\doxysubsubsection{\texorpdfstring{connectDB()}{connectDB()}}
+{\footnotesize\ttfamily bool connect\+DB (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Establishes a connection to the database. 
+
+\begin{DoxyReturn}{Returns}
+Boolean indicating success or failure. 
+\end{DoxyReturn}
+\Hypertarget{ci_8hpp_adb3d71a17491d64be7bfe71ce597b80f}\label{ci_8hpp_adb3d71a17491d64be7bfe71ce597b80f} 
+\index{ci.hpp@{ci.hpp}!createTables@{createTables}}
+\index{createTables@{createTables}!ci.hpp@{ci.hpp}}
+\doxysubsubsection{\texorpdfstring{createTables()}{createTables()}}
+{\footnotesize\ttfamily bool create\+Tables (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Creates necessary tables in the database. 
+
+\begin{DoxyReturn}{Returns}
+Boolean indicating success or failure.
+\end{DoxyReturn}
+create\+Tables Create the neccessary tables for the program to function the ci\+\_\+tests table is for testing \Hypertarget{ci_8hpp_a3acee2bd75c01448c833bbc0409fb870}\label{ci_8hpp_a3acee2bd75c01448c833bbc0409fb870} 
+\index{ci.hpp@{ci.hpp}!incomingWebhook@{incomingWebhook}}
+\index{incomingWebhook@{incomingWebhook}!ci.hpp@{ci.hpp}}
+\doxysubsubsection{\texorpdfstring{incomingWebhook()}{incomingWebhook()}}
+{\footnotesize\ttfamily void incoming\+Webhook (\begin{DoxyParamCaption}\item[{const httplib\+::\+Request \&}]{req,  }\item[{httplib\+::\+Response \&}]{res }\end{DoxyParamCaption})}
+
+
+
+Handles incoming webhooks. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em req} & The incoming HTTP request. \\
+\hline
+{\em res} & The HTTP response to be sent.\\
+\hline
+\end{DoxyParams}
+incoming\+Webhook Function to handle HTTP messages sent to the webhook from Git\+Hub. When a request (and response object) is recieved from the server, parse the body and check the event header. If event is to be processed, extract the required parameters to be used for the CI. If not used, return a successfull response but don\textquotesingle{}t use it. If error in packet, return a 400 status.
+
+
+\begin{DoxyParams}{Parameters}
+{\em req} & a httplib request containing information from Git\+Hub \\
+\hline
+{\em res} & a response to send back to Git\+Hub for it to know that the request is being serviced. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{ci_8hpp_a6c915a5c46a47fe32de76d115707bc16}\label{ci_8hpp_a6c915a5c46a47fe32de76d115707bc16} 
+\index{ci.hpp@{ci.hpp}!insertToDB@{insertToDB}}
+\index{insertToDB@{insertToDB}!ci.hpp@{ci.hpp}}
+\doxysubsubsection{\texorpdfstring{insertToDB()}{insertToDB()}}
+{\footnotesize\ttfamily bool insert\+To\+DB (\begin{DoxyParamCaption}\item[{std\+::string}]{commit\+SHA,  }\item[{std\+::string}]{build\+Log }\end{DoxyParamCaption})}
+
+
+
+Inserts commit data into the database. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em commit\+SHA} & The commit SHA identifier. \\
+\hline
+{\em build\+Log} & The log of the build process. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Boolean indicating success or failure. 
+\end{DoxyReturn}
+\Hypertarget{ci_8hpp_a7f290cad8c097bbff8c1979114622139}\label{ci_8hpp_a7f290cad8c097bbff8c1979114622139} 
+\index{ci.hpp@{ci.hpp}!listCommits@{listCommits}}
+\index{listCommits@{listCommits}!ci.hpp@{ci.hpp}}
+\doxysubsubsection{\texorpdfstring{listCommits()}{listCommits()}}
+{\footnotesize\ttfamily void list\+Commits (\begin{DoxyParamCaption}\item[{const httplib\+::\+Request \&}]{req,  }\item[{httplib\+::\+Response \&}]{res }\end{DoxyParamCaption})}
+
+
+
+Lists the commits stored in the system. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em req} & The incoming HTTP request. \\
+\hline
+{\em res} & The HTTP response containing commit data.\\
+\hline
+\end{DoxyParams}
+list\+Commits Function to handle HTTP get messages to grab a list of all builds done by the CI server in the past. req does not matter as function is only called when going to a specific / of the url. Begins by grabbing all the ids and commit numbers from the database, adds them to the HTML as links.
+
+
+\begin{DoxyParams}{Parameters}
+{\em req} & required argument for httplib callback function \\
+\hline
+{\em res} & response with HTML to the caller. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{ci_8hpp_a487f1abb996a25726689c790b552097d}\label{ci_8hpp_a487f1abb996a25726689c790b552097d} 
+\index{ci.hpp@{ci.hpp}!makeTests@{makeTests}}
+\index{makeTests@{makeTests}!ci.hpp@{ci.hpp}}
+\doxysubsubsection{\texorpdfstring{makeTests()}{makeTests()}}
+{\footnotesize\ttfamily int make\+Tests (\begin{DoxyParamCaption}\item[{std\+::string}]{repo\+Path }\end{DoxyParamCaption})}
+
+
+
+Runs tests on the repository. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em repo\+Path} & The path to the repository. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Integer representing success (0) or failure. 
+\end{DoxyReturn}
+\Hypertarget{ci_8hpp_afb92a115cb0b31e704c925bfaf426ff3}\label{ci_8hpp_afb92a115cb0b31e704c925bfaf426ff3} 
+\index{ci.hpp@{ci.hpp}!notifyCommitStatus@{notifyCommitStatus}}
+\index{notifyCommitStatus@{notifyCommitStatus}!ci.hpp@{ci.hpp}}
+\doxysubsubsection{\texorpdfstring{notifyCommitStatus()}{notifyCommitStatus()}}
+{\footnotesize\ttfamily int notify\+Commit\+Status (\begin{DoxyParamCaption}\item[{std\+::string}]{api\+Url,  }\item[{std\+::string}]{status }\end{DoxyParamCaption})}
+
+
+
+Notifies the commit status to an external service. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em commit\+SHA} & The commit SHA identifier. \\
+\hline
+{\em status} & The status message. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Integer representing success (0) or failure.
+\end{DoxyReturn}
+notify\+Commit\+Status notify Github with the status of the commit \Hypertarget{ci_8hpp_adece9258103cab9ed2cd9c8c24a8dc04}\label{ci_8hpp_adece9258103cab9ed2cd9c8c24a8dc04} 
+\index{ci.hpp@{ci.hpp}!readFile@{readFile}}
+\index{readFile@{readFile}!ci.hpp@{ci.hpp}}
+\doxysubsubsection{\texorpdfstring{readFile()}{readFile()}}
+{\footnotesize\ttfamily std\+::string read\+File (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{file\+Path }\end{DoxyParamCaption})}
+
+
+
+Reads a file and returns its contents as a string. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em file\+Path} & The path to the file. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The file contents as a string.
+\end{DoxyReturn}
+read\+File Given a filepath reads the filecontent and returns it as a string. If no file was found or error opening file returns empty string. \Hypertarget{ci_8hpp_a5ea4db9b8d3d543773cc14affc0270e8}\label{ci_8hpp_a5ea4db9b8d3d543773cc14affc0270e8} 
+\index{ci.hpp@{ci.hpp}!sendCommitInfo@{sendCommitInfo}}
+\index{sendCommitInfo@{sendCommitInfo}!ci.hpp@{ci.hpp}}
+\doxysubsubsection{\texorpdfstring{sendCommitInfo()}{sendCommitInfo()}}
+{\footnotesize\ttfamily void send\+Commit\+Info (\begin{DoxyParamCaption}\item[{std\+::string}]{public\+Key,  }\item[{httplib\+::\+Response \&}]{res }\end{DoxyParamCaption})}
+
+
+
+Sends commit information. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em public\+Key} & The public key associated with the commit. \\
+\hline
+{\em res} & The HTTP response to be sent.\\
+\hline
+\end{DoxyParams}
+send\+Commit\+Info Function to get data from the database and send it back as HTML for a specific CI execution. First grabs neccessary columns from public\+Key row then sets these ordered in a HTML document and sends back through res.
+
+
+\begin{DoxyParams}{Parameters}
+{\em public\+Key} & which public\+Key row to grab from. \\
+\hline
+{\em res} & response with HTML to the caller. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{ci_8hpp_aa34f4f33c94809c4d3b7b4299a480bc0}\label{ci_8hpp_aa34f4f33c94809c4d3b7b4299a480bc0} 
+\index{ci.hpp@{ci.hpp}!testingSequence@{testingSequence}}
+\index{testingSequence@{testingSequence}!ci.hpp@{ci.hpp}}
+\doxysubsubsection{\texorpdfstring{testingSequence()}{testingSequence()}}
+{\footnotesize\ttfamily int testing\+Sequence (\begin{DoxyParamCaption}\item[{std\+::string}]{clone\+Url,  }\item[{std\+::string}]{commit\+SHA,  }\item[{std\+::string}]{branch,  }\item[{std\+::string}]{status\+Url }\end{DoxyParamCaption})}
+
+
+
+Runs the testing sequence for a given repository. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em clone\+Url} & The repository clone URL. \\
+\hline
+{\em commit\+SHA} & The commit SHA to be tested. \\
+\hline
+{\em branch} & The branch to be tested. \\
+\hline
+{\em status\+Url} & The URL to send status updates. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Integer representing success (0) or failure.
+\end{DoxyReturn}
+testing\+Sequence Use this sequence to do the continous integration First notifies github about the pending test then clones the repository and compiles it, if successfully compiled test it. Return status of compilation and testing to github and add into a repository 
