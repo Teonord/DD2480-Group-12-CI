@@ -23,15 +23,15 @@ void print(std::string st) {
     std::cout << st << std::endl;
 }
 
-
-
-
 /** testingSequence
  *  Use this sequence to compile, test and return 
  *  aka this is the thing that does the stuff 
  *  -------- MAKE BETTER COMMENT AS CODE IS DEVELOPED -----------------
  */
-int testingSequence(std::string cloneUrl, std::string commitSHA, std::string branch) {
+int testingSequence(std::string cloneUrl, std::string commitSHA, std::string branch, std::string statusUrl) {
+
+    notifyCommitStatus(statusUrl, "pending");
+
     // git clone the branch at commit sha
     print("Cloning...");
     cloneFromGit(cloneUrl, commitSHA, branch);
@@ -50,9 +50,13 @@ int testingSequence(std::string cloneUrl, std::string commitSHA, std::string bra
         print(std::to_string(res));
         filePath = repoPath + "/tests.log";
 
+        if (res == 0) notifyCommitStatus(statusUrl, "success");
+        else notifyCommitStatus(statusUrl, "failure");
+
         std::string rm_build_command = "rm " + repoPath + "/build.log";
         std::system(rm_build_command.c_str());
     } else {
+        notifyCommitStatus(statusUrl, "error");
         filePath = repoPath + "/build.log";
     }
     
@@ -66,6 +70,31 @@ int testingSequence(std::string cloneUrl, std::string commitSHA, std::string bra
     std::system(rm_command.c_str());
 
     return 0;
+}
+
+int notifyCommitStatus(std::string apiUrl, std::string status) {
+    httplib::SSLClient client("api.github.com");
+    std::string apiPath = apiUrl.substr(22);
+
+    std::string token = std::getenv("GITHUB_API_TOKEN");
+    nlohmann::json payload = {{"state", status}, {"context", "ci/testci"}};
+    nlohmann::json headers =  {{"Authorization", "token " + token}, {"User-Agent", "My-CI-Server"}, {"Accept", "application/vnd.github.v3+json"}};
+
+    auto res = client.Post(apiPath.c_str(), headers, payload.dump(), "application/json");
+
+    if (res && res->status == 201) {
+        std::cout << "GitHub status updated successfully!\n";
+        return 201;
+    } else {
+        if (res) {
+            std::cerr << "Failed with code " << res->status << "\n";
+            std::cerr << "Response: " << res->body << "\n";
+            return res->status;
+        } else {
+            std::cerr << "Failed with no code \n";
+            return -1;
+        }
+    }
 }
 
 
@@ -165,12 +194,13 @@ void incomingWebhook(const httplib::Request &req, httplib::Response &res) {
             std::string cloneUrl = payload["repository"]["clone_url"];
             std::string commitSHA = payload["head_commit"]["id"];
             std::string branch = ref.substr(11);
+            std::string statusUrl = payload["repository"]["statuses_url"];
 
             std::cout << "Test from " << cloneUrl << std::endl;
 
             #ifndef TESTING
                 // do CI on recieved repository
-                std::thread pr(testingSequence, cloneUrl, commitSHA, branch);
+                std::thread pr(testingSequence, cloneUrl, commitSHA, branch, statusUrl);
                 pr.detach();
             #endif
             
@@ -184,12 +214,13 @@ void incomingWebhook(const httplib::Request &req, httplib::Response &res) {
                 std::string cloneUrl = payload["repository"]["clone_url"];
                 std::string commitSHA = payload["pull_request"]["head"]["sha"];
                 std::string branch = payload["pull_request"]["head"]["ref"];
+                std::string statusUrl = payload["repository"]["statuses_url"];
 
                 std::cout << "Test from " << cloneUrl << std::endl;
 
                 #ifndef TESTING
                     // do CI on recieved repository
-                    std::thread pr(testingSequence, cloneUrl, commitSHA, branch);
+                    std::thread pr(testingSequence, cloneUrl, commitSHA, branch, statusUrl);
                     pr.detach();
                 #endif
 
